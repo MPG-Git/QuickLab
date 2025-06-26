@@ -1,0 +1,42 @@
+function [rejE] = run_tbt_jointprob_timewindow(EEG, timeWinMS, icacomp, chancomps, thresholds)
+% timeWinMS: [start_ms end_ms]
+% icacomp: 1 = EEG data; 0 = ICA
+% chancomps: vector of channels or ICs
+% thresholds: [locthresh globthresh]
+
+srate = EEG.srate;
+win_start = timeWinMS(1); % in ms
+win_end   = timeWinMS(2); % in ms
+
+% Convert to sample indices
+t = linspace(EEG.xmin*1000, EEG.xmax*1000, EEG.pnts);  % epoch time in ms
+[~, sampStart] = min(abs(t - win_start));
+[~, sampEnd]   = min(abs(t - win_end));
+sampStart = max(1, sampStart);
+sampEnd   = min(EEG.pnts, sampEnd);
+
+% Get data
+if icacomp == 1
+    data = eeg_getdatact(EEG); % chan × time × trials
+    probStats = EEG.stats.jpE;
+else
+    data = eeg_getica(EEG);    % IC × time × trials
+    probStats = EEG.stats.icajpE;
+end
+
+% Clip time window
+data = data(:, sampStart:sampEnd, :);
+
+% Run jointprob on reshaped data
+numChans = length(chancomps);
+numTrials = EEG.trials;
+rejE = zeros(numChans, numTrials);
+
+for i = 1:numChans
+    ch = chancomps(i);
+    sig = squeeze(data(ch,:,:)); % time × trials
+    sig = sig'; % trials × time
+    [~, rejE(i,:)] = jointprob(sig, thresholds(1), probStats(ch,:), 0); 
+end
+
+end
