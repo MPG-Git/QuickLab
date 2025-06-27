@@ -4634,7 +4634,7 @@ end
         g.winrej_pc = g.winrej;
         %%%%%%applycom_pc = 'NEW=EEG;[NEW LASTCOM1] = eeg_eegrej2(NEW,g.winrej,2,find([g.eloc_file.badchan])); ' ; %modified for eegrej2
 		%applycom_ch = sprintf('NEW=EEG;[NEW LASTCOM1] = eeg_eegrej2_NL(NEW,g.winrej,2,find([g.eloc_file.badchan]), %d, %d);', g.winmin, g.winmax);
-		applycom_ch = ['NEW=EEG;[NEW LASTCOM1] = eeg_eegrej2_NL(NEW, g.winrej, 2, find([g.eloc_file.badchan]), ', ...
+		applycom_pc = ['NEW=EEG;[NEW LASTCOM1] = eeg_eegrej2_NL(NEW, g.winrej, 2, find([g.eloc_file.badchan]), ', ...
 						num2str(winmin), ', ', num2str(winmax), ');'];
 
 		
