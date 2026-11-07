@@ -7,6 +7,11 @@ November 7, 2026, after extraction into a new folder containing spaces.
 These ZIPs use the review branch, which includes the readiness fixes and examples.
 The review changes have not been merged into the default branches.
 
+QuickLab and Spatiotemporal_PCA_Data_Driven are private repositories: their GitHub
+downloads require sign-in and repository access. An owner can also download a
+ZIP and share that archive with the intended user. The other six repositories
+are public. This index is hosted in the private QuickLab repository as well.
+
 | Repository | Run it with | Included check | Download and instructions |
 |---|---|---|---|
 | QuickLab | EEGLAB plugin | Infinity minus Average: mean 2 microvolts; RMS 2.121320344 | [ZIP](https://github.com/MPG-Git/QuickLab/archive/refs/heads/codex/readiness-20261107.zip) · [Guide](https://github.com/MPG-Git/QuickLab/blob/codex/readiness-20261107/QuickLab_11.12.21_NL/examples/synthetic/README.md) |
