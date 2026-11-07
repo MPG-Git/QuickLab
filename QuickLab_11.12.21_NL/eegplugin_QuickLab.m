@@ -81,7 +81,10 @@ uimenu( othermenu, 'label', 'Quick Plot Channel Spectra 18 to 55hz', 'callback',
     ['[EEG, com] = quick_spectra(EEG,55,18);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);']);
 
 uimenu( othermenu, 'label', 'Plot Last Files Data Differences', 'callback', ...
-    ['plotDifference(ALLEEG);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);']);
+    'plotDifference(ALLEEG);');
+
+uimenu( othermenu, 'label', 'Compare Datasets (Infinity / Average...)', 'callback', ...
+    'plotDifference(ALLEEG, ''select'');');
     
 printmenu = uimenu (plotmenu, 'label', 'Quick Print'); 
 
