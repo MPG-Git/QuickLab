@@ -7,10 +7,8 @@ November 7, 2026, after extraction into a new folder containing spaces.
 These ZIPs come from main and include the tested readiness fixes, synthetic
 inputs, example runners, and reference outputs.
 
-QuickLab and Spatiotemporal_PCA_Data_Driven are private repositories: their GitHub
-downloads require sign-in and repository access. An owner can also download a
-ZIP and share that archive with the intended user. The other six repositories
-are public. This index is hosted in the private QuickLab repository as well.
+All eight repositories and this index are public. The ZIP downloads below do
+not require a GitHub account or repository access.
 
 | Repository | Run it with | Included check | Download and instructions |
 |---|---|---|---|
