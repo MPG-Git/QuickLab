@@ -1,0 +1,8 @@
+{
+  "data/synthetic_average.set": "1eefd0d20a7ce98b35b55988b1eb8155280028dfe51b69be72b4c586284a0661",
+  "data/synthetic_infinity.set": "a6bfb987e8d3e3d334a46244a3575a2931603ca4e0681f96b0dfe0d0de13d7a5",
+  "expected/channel_differences.csv": "a4de34081829da63bbe83866ac9de6966e08134cb990f33f00cb42cc09ebac41",
+  "expected/comparison.png": "d11954b9f4b298824e061e6215e4def5c594c84ea6e8b58a48b98d91a537b698",
+  "expected/metrics.csv": "de1caec06e5081862c9574fcd680761cb1a8f7bf72e00f8172b3b4cb8ad8f351",
+  "expected/rms_by_channel.png": "87c62a150492cc3236857f67b2d15d9c7b675abf71670941e4fe0245f4a00e86"
+}

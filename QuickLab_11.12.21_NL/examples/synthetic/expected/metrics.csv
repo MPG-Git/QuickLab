@@ -1,0 +1,5 @@
+Metric,Value,AbsTolerance
+Channels,3,0
+SamplesPerChannel,1000,0
+MeanDifference,2,1e-06
+OverallRMS,2.12132034355964,1e-06

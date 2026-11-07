@@ -120,3 +120,13 @@ validate_infinity_average('path/to/eeglab', 'path/to/validation-output');
 
 This generates comparison PNGs, a statistics CSV, and a JSON result summary.
 It does not write or change EEG datasets.
+
+## Downloadable synthetic example
+
+[Run the bundled synthetic example](QuickLab_11.12.21_NL/examples/synthetic/README.md) to check your setup against
+included reference outputs. It contains actual input files, a one-command runner,
+expected tables/plots, and numerical comparisons that report PASS or a mismatch.
+The example guide links to the ZIP of this review branch, including the readiness fixes.
+
+See the [download index for all eight neuroscience examples](SYNTHETIC_EXAMPLES.md)
+for the companion tools, setup requirements, and expected results.
