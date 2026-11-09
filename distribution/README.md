@@ -15,7 +15,7 @@ from the installation; official publishers' sample/template data are retained.
 
 ## Install once, then use the desktop shortcut
 
-1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.0.0).
+1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.1.0).
 2. Double-click it, then click **Install and open EEGLAB**. MATLAB is detected automatically; choose its `matlab.exe` if detection fails.
 3. Wait for the downloads and practice checks. MATLAB windows may open briefly during validation. EEGLAB opens when the checks pass.
 
@@ -38,6 +38,20 @@ An update is downloaded, checked against GitHub's SHA-256 digest, installed into
 After a rollback, that release is held back so it is not immediately offered again. A later release can still be offered. Third-party plugin updates and GitHub commits are included only when the maintainer pins and tests them in a new desktop release. See [publishing updates](desktop/UPDATING.md).
 
 The launcher uses one EEGLAB root, enables the full menus required by TBT, and selects FieldTrip-lite ahead of Fileio. It does not permanently save the MATLAB path. Once normal workflows work with the new build, the old installation can be archived.
+
+### Help when something goes wrong
+
+Version 1.1.0 asks once whether to send limited technical error reports privately
+to the maintainer. Choose **Yes** to enable it or **No** to keep automatic
+reporting off. No GitHub or Supabase account is needed. Change this choice later
+using **Error reporting settings** in EEGLAB.
+
+The **Get error report** menu saves a readable technical report and opens its
+folder so it can be attached to an email. This also works with automatic
+reporting off. Neither feature includes recordings, error-message text,
+commands, participant names, or personal file paths. Raw MATLAB logs stay local.
+Automatic delivery retries when online; GitHub collection normally runs hourly.
+Not every MATLAB failure can be captured. See [reporting details](desktop/REPORTING.md).
 
 ### Advanced: script-only installation
 

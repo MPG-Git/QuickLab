@@ -1,5 +1,5 @@
 {
   "schemaVersion": 1,
-  "endpoint": "",
+  "endpoint": "https://xuhumtlubgkqfcfrrwiv.supabase.co/functions/v1/eeglab-reports/report",
   "privacyVersion": 1
 }

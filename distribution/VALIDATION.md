@@ -61,6 +61,31 @@ or plugin source. A local Perl locale/path warning remained. Startup was tested
 with real MATLAB figure support; EEGLAB's `getframe` startup cannot run under
 `-noFigureWindows` in this environment.
 
+## Desktop 1.1.0 error reporting
+
+Checked 9 November 2026 with fabricated errors only:
+
+- 15 Node checks passed, including signed GitHub OIDC validation and the actual
+  PostgreSQL migration in PGlite (permissions, retries, leases and daily quota).
+- 9 Windows PowerShell reporting checks passed; the 16 update regression checks
+  also passed after adding the new payload files.
+- Real MATLAB checks passed for redaction, consent, queue withdrawal, bounded
+  history and manual export. A real desktop launch captured a fabricated runtime
+  error through its timer and displayed both new menu items. The exported report
+  omitted the fabricated private message.
+- Live Supabase tables have RLS enabled; anonymous and authenticated roles have
+  no read access or claim permission. The public health check succeeds and an
+  unauthenticated claim returns 401.
+- The hosted synthetic integration run delivered to a private GitHub issue,
+  deduplicated a retried event, updated the same issue to two observations, and
+  rejected an extra free-text field. GitHub run 42716686447 passed on private
+  support commit c63c4b9. Its synthetic issue was marked and closed.
+
+The deployed function imports service code and its allowlist from immutable
+QuickLab commit `4cffd020a5e55a010a4dbe51d37875fff6a26095`.
+Reporting coverage and retention limits are documented in
+[REPORTING.md](desktop/REPORTING.md).
+
 ## What this does not establish
 
 Plugin registration and these examples do not test all third-party algorithms,

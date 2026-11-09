@@ -51,10 +51,19 @@ hash so new plugin versions do not collide with old downloads.
 The launcher asks before an update, with a one-day deferral when declined.
 Network/API errors fall back to the installed version. A rollback selects the
 previous validated folder and holds back the rejected release until a newer
-one is published. Logs are local; the updater transmits no recordings or logs.
+one is published. Raw logs stay local. Version 1.1.0 can send allowlisted technical
+error records only after the user opts in; see [REPORTING.md](REPORTING.md).
 
 The update worker is separate from the progress window so long downloads and
 MATLAB checks do not block the window's UI. An installation lock prevents two
 launchers from changing the active pointer simultaneously. Interrupted and
 failed candidates are retained for diagnosis; there is no automatic recursive
 cleanup of old versions or user files.
+
+For releases with reporting, regenerate the code-source catalog using
+`distribution/reporting-service/build_catalog.py` against the validated install.
+Preserve previous catalogs, deploy the updated service and private collector,
+and run the manual synthetic live test before publishing the installer. The
+function can use HTTPS imports pinned to an immutable QuickLab commit. Never
+import a moving branch in production. Run the reporting PowerShell, MATLAB and
+Node tests in addition to the update checks.

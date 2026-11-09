@@ -8,6 +8,9 @@ For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distri
 The desktop installer finds MATLAB, creates shortcuts, and checks GitHub for
 tested updates. Updates are validated before activation, with a previous-version
 shortcut for rollback.
+Desktop version 1.1.0 also provides **Get error report** and optional private
+technical reporting. Lab members need no GitHub or Supabase account. See the
+[reporting details and limits](distribution/desktop/REPORTING.md).
 It downloads all 53 plugins from the supplied startup inventory, consolidates
 duplicates, and includes the QuickLab/NeuroLode synthetic examples. See its
 [inventory](distribution/PLUGIN_INVENTORY.md) and [validation limits](distribution/VALIDATION.md).
