@@ -1,5 +1,28 @@
 # Validation of the EEGLAB replacement build
 
+## Desktop installer and updates, 9 November 2026
+
+The Windows desktop installer detects MATLAB and installs shortcuts without
+command entry. Each managed installation/update runs the 53-plugin startup
+check and both known-answer examples in MATLAB before activation.
+
+The update contract suite passed **16 checks** under Windows PowerShell 5.1:
+stable-version selection, prerelease exclusion, publisher URL/hash validation,
+corrupt downloads, release mismatch, archive traversal, rollback/holdback,
+concurrency locking, offline launch, failed-validation retention, successful
+activation, and preservation of existing files. A real staged upgrade from a
+local 1.0.0 test installation to a 1.0.1 fixture passed startup and both examples;
+rollback selected 1.0.0 and retained both folders. These fixture versions were
+not published as pretend releases.
+
+Tests use an isolated MATLAB preferences directory because this test computer's
+ordinary preferences file is corrupt. David's settings and hardware remain
+untested. The GUI was inspected for readable layout and automatic MATLAB
+detection; local backend and package validation are separate from a test on
+David's machine. The installer is unsigned.
+
+## EEGLAB and plugin validation
+
 Checked 9 November 2026, Windows, MATLAB R2023b Update 3, EEGLAB 2026.1.0.
 
 | Check | Result |

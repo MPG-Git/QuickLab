@@ -24,11 +24,15 @@ New-Item -ItemType Directory -Path $Cache -Force | Out-Null
 $Cache = [IO.Path]::GetFullPath($Cache)
 
 function Get-VerifiedArchive($item, [string]$cacheName) {
-    $zipPath = Join-Path $Cache $cacheName
+    $legacyPath = Join-Path $Cache $cacheName
+    if ((Test-Path -LiteralPath $legacyPath) -and (Get-FileHash -LiteralPath $legacyPath -Algorithm SHA256).Hash -eq $item.sha256) { return $legacyPath }
+    $zipPath = Join-Path $Cache ($item.name + '-' + $item.sha256 + '.zip')
     if (-not (Test-Path -LiteralPath $zipPath)) {
         Write-Host "Downloading $($item.name) $($item.version)..."
-        Invoke-WebRequest -UseBasicParsing -Uri $item.url -OutFile ($zipPath + '.partial')
-        Move-Item -LiteralPath ($zipPath + '.partial') -Destination $zipPath
+        $partial = $zipPath + '.' + [guid]::NewGuid().ToString('N') + '.partial'
+        Invoke-WebRequest -UseBasicParsing -Uri $item.url -OutFile $partial -TimeoutSec 180
+        if ((Get-FileHash -LiteralPath $partial -Algorithm SHA256).Hash -ne $item.sha256) { throw "Checksum mismatch for $($item.name). The current installation has not been changed." }
+        Move-Item -LiteralPath $partial -Destination $zipPath
     }
     if ((Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash -ne $item.sha256) {
         throw "Checksum mismatch: $zipPath. The upstream archive may have changed; do not use this incomplete installation."

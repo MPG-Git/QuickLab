@@ -5,6 +5,9 @@ restores **Plot Last Files Data Differences** and adds a chooser for comparing
 stored Infinity- and Average-referenced versions of the same recording.
 
 For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distribution/README.md).
+The desktop installer finds MATLAB, creates shortcuts, and checks GitHub for
+tested updates. Updates are validated before activation, with a previous-version
+shortcut for rollback.
 It downloads all 53 plugins from the supplied startup inventory, consolidates
 duplicates, and includes the QuickLab/NeuroLode synthetic examples. See its
 [inventory](distribution/PLUGIN_INVENTORY.md) and [validation limits](distribution/VALIDATION.md).

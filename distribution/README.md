@@ -13,36 +13,35 @@ their own licenses and dependencies apply. No personal EEG recordings are used.
 Legacy QuickLab `.set`/`.fdt` files outside its synthetic example are excluded
 from the installation; official publishers' sample/template data are retained.
 
-## Install in a new folder
+## Install once, then use the desktop shortcut
 
-Download this QuickLab repository ZIP, extract it, and open PowerShell in its
-`distribution` folder. Run:
+1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.0.0).
+2. Double-click it, then click **Install and open EEGLAB**. MATLAB is detected automatically; choose its `matlab.exe` if detection fails.
+3. Wait for the downloads and practice checks. MATLAB windows may open briefly during validation. EEGLAB opens when the checks pass.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\Install-EEGLAB.ps1 -Destination C:\EEGLAB_2026_New
-```
+After that, double-click **EEGLAB 2026** on the desktop. No commands, GitHub account, or administrator access are needed. An installed, licensed MATLAB is required. The executable is currently unsigned, so Windows may show a publisher notice. If Windows blocks it, contact the maintainer rather than disabling protection.
 
-The process downloads approximately 1 GB and needs additional disk space to
-extract it. Keep the terminal open until it reports completion. It refuses to
-overwrite an existing destination. A partial installation has no `COMPLETE.json`;
-choose another new destination when retrying. Downloads are cached under
-`%LOCALAPPDATA%\EEGLAB-download-cache` and verified before reuse.
+The installer downloads approximately 1 GB and needs extra disk space for the application, cache and retained versions. It stores the managed installation under `%LOCALAPPDATA%\MPG\EEGLAB`. Existing EEGLAB installations remain in place. Keep recordings in a separate data folder.
 
-Start a **new MATLAB session**, change its Current Folder to
-`C:\EEGLAB_2026_New`, then run:
+The desktop shortcuts are:
 
-```matlab
-[ALLEEG, EEG, CURRENTSET, ALLCOM] = start_eeglab_replacement;
-report = check_eeglab_replacement;
-```
+- **EEGLAB 2026**: check for a tested update, then open EEGLAB.
+- **EEGLAB Practice**: open EEGLAB and run both generated-data examples.
+- **EEGLAB Previous Version**: switch back to the previous validated installation. Available after the first update.
 
-The launcher uses MATLAB's default path plus this installation for the session.
-It enables the full EEGLAB menus so TBT's legacy rejection menu is available,
-and selects FieldTrip-lite ahead of the smaller Fileio copy of `ft_defaults`.
-It does not save the path or delete the old installation. Do not use “Add with
-Subfolders” on EEGLAB. Once this build passes your normal workflows, archive the
-old installation and remove its entries from MATLAB startup scripts/saved paths.
-Keep your recordings separately from application folders.
+### How updates work
+
+At launch, the shortcut checks public MPG-Git/QuickLab releases. A newer stable desktop release offers a **Yes / No** choice: update and open, or use the current version. Declining postpones the offer for a day. Offline or unavailable GitHub checks still open the installed version.
+
+An update is downloaded, checked against GitHub's SHA-256 digest, installed into a new version folder, and tested in MATLAB. Startup registration for all inventoried plugins and both synthetic examples must pass before the active version changes. Failed checks preserve the current installation. Old versions and practice outputs are retained; recordings are never an update target. Running MATLAB sessions continue using their existing installation.
+
+After a rollback, that release is held back so it is not immediately offered again. A later release can still be offered. Third-party plugin updates and GitHub commits are included only when the maintainer pins and tests them in a new desktop release. See [publishing updates](desktop/UPDATING.md).
+
+The launcher uses one EEGLAB root, enables the full menus required by TBT, and selects FieldTrip-lite ahead of Fileio. It does not permanently save the MATLAB path. Once normal workflows work with the new build, the old installation can be archived.
+
+### Advanced: script-only installation
+
+The original `Install-EEGLAB.ps1 -Destination <new-folder>` remains available for maintainers. It does not install the desktop updater; use the EXE for the no-command workflow.
 
 ## Synthetic examples
 
@@ -52,7 +51,7 @@ Follow those READMEs to reproduce and compare results. Other plugins retain
 whatever examples their official packages provide; a synthetic test of every
 third-party algorithm has not been supplied or claimed.
 
-After launching this installation, run both examples together:
+Use the **EEGLAB Practice** shortcut or **Practice data** menu without typing. The command-line equivalent is:
 
 ```matlab
 run_replacement_examples;
