@@ -23,9 +23,14 @@
 % Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 function vers = eegplugin_QuickLab(fig, try_strings, catch_strings)
 
-vers = 0.1;
+% EEGLAB parses a textual version. A numeric value is displayed as v?.
+vers = '0.1';
+if nargin < 1 || isempty(fig), return; end
+% Repeated discovery must not create a second copy of this build's menu.
+% Duplicate installations still need to be removed from the MATLAB path.
+if ~isempty(findall(fig, 'Type', 'uimenu', 'Tag', 'quicklab_menu')), return; end
 % --- QuickLab sumermenu placeholder
-supermenu = uimenu(fig, 'label', 'QuickLab');
+supermenu = uimenu(fig, 'label', 'QuickLab', 'Tag', 'quicklab_menu');
 
 % --- Call QuickLab DEFS
 

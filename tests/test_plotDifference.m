@@ -180,10 +180,19 @@ function testMenuWiring(tc)
 fig = figure('Visible','off'); cleanup = onCleanup(@() close(fig)); %#ok<NASGU>
 uimenu(fig,'Label','Plot');
 s.no_check = ''; c.store_and_hist = '';
+vers = eegplugin_QuickLab(fig,s,c);
+tc.verifyEqual(vers,'0.1');
 eegplugin_QuickLab(fig,s,c);
+tc.verifyNumElements(findall(fig,'Type','uimenu','Tag','quicklab_menu'),1);
 old = findall(fig,'Type','uimenu','Label','Plot Last Files Data Differences');
 picker = findall(fig,'Type','uimenu','Label','Compare Datasets (Infinity / Average...)');
 tc.verifyNumElements(old,1); tc.verifyNumElements(picker,1);
 tc.verifyEqual(get(old,'Callback'),'plotDifference(ALLEEG);');
 tc.verifyEqual(get(picker,'Callback'),'plotDifference(ALLEEG, ''select'');');
+end
+
+function testVersionProbeDoesNotCreateFigure(tc)
+before = findall(groot,'Type','figure');
+tc.verifyEqual(eegplugin_QuickLab,'0.1');
+tc.verifyEqual(findall(groot,'Type','figure'),before);
 end

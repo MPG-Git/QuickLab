@@ -28,6 +28,10 @@ The comparator requires MATLAB and EEGLAB. REST and FieldTrip are only needed
 to **create** Infinity-referenced data or run the integration test; the
 comparator reads reference versions that have already been computed.
 
+If startup lists multiple EEGLAB installations or repeated QuickLab plugins,
+follow the [setup troubleshooting guide](SETUP_TROUBLESHOOTING.md). The included
+`quicklab_setup_report` inspects paths and plugin folders without changing them.
+
 ## Compare Infinity and Average
 
 Load both versions into EEGLAB and keep both in the **Datasets** list. Use
@@ -101,7 +105,13 @@ An integration test used the real EEGLAB sample recording, 30 scalp channels
 against `pop_reref(EEG, [])` Average output. The test checked statistics,
 the arrays passed to both viewers, retained means, unchanged inputs, and
 channel reordering. See [the validation record](tests/VALIDATION.md).
-David's files and exact EEGLAB 2021 installation have not been directly tested.
+Real-user recordings and the mixed EEGLAB 2024/2026.1.0 installation described
+in a startup log have not been directly tested.
+
+On 9 November 2026, all **20 current tests passed with EEGLAB 2020.0 and
+2024.2**. Added checks cover textual plugin version reporting, repeated menu
+initialization, and read-only detection of duplicate EEGLAB roots and QuickLab
+plugin folders. The bundled Infinity/Average example also passed again.
 
 To reproduce the regression tests:
 

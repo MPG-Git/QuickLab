@@ -31,6 +31,26 @@ existing local MATLAB preferences warning; all numerical and graphics checks
 completed successfully. FieldTrip also reconstructed sample information for
 the sample epochs; the test preserves their original stored order.
 
-David's actual files and EEGLAB 2021 installation were not directly tested.
+Real-user recordings and a mixed EEGLAB 2024/2026.1.0 installation were not
+directly tested.
 Run `run_quicklab_tests` and `validate_infinity_average` as described in the root
 README to reproduce these results with a local installation.
+
+## Startup follow-up, 9 November 2026
+
+MATLAB R2023b Update 3: the expanded suite passed **20/20 tests with EEGLAB
+2024.2 and 20/20 with EEGLAB 2020.0**. The plugin hook now returns its existing
+version as text, supports a version-only query, and does not duplicate its
+tagged menu when called again. Both comparison menu callbacks remain unchanged.
+
+The new read-only setup report detected two fixture EEGLAB roots and two
+QuickLab hook files in separate plugin folders, including folders not on the
+MATLAB path. The test hooks deliberately error if executed; inspection completed
+without executing them. Tests also verified unchanged paths, current folder,
+and figure state.
+
+The shipped synthetic Infinity/Average example was rerun with EEGLAB 2024.2.
+Its reference comparisons passed: mean difference 2 microvolts and RMS
+2.12132034355964 microvolts. The comparison implementation and synthetic input
+files were unchanged. The real-REST integration results above remain the
+7 November run, not a new test of a user's full plugin collection.
