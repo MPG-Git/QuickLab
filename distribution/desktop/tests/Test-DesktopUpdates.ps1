@@ -75,7 +75,7 @@ $fixture=Join-Path $OutputDirectory 'package';[IO.Directory]::CreateDirectory((J
 [IO.File]::WriteAllText((Join-Path $fixture 'desktop\release.json'),'{"schemaVersion":1,"version":"1.0.2","tag":"eeglab-desktop-v1.0.2"}')
 [IO.File]::WriteAllText((Join-Path $fixture 'manifest.json'),'{}')
 [IO.File]::WriteAllText((Join-Path $fixture 'Install-EEGLAB.ps1'),'param($Destination,$Cache); [IO.Directory]::CreateDirectory($Destination) | Out-Null')
-foreach($name in @('eeglab_desktop_start.m','eeglab_practice.m','validate_desktop_update.m')){[IO.File]::WriteAllText((Join-Path $fixture ('desktop\'+$name)),'% test fixture')}
+foreach($name in @('eeglab_desktop_start.m','eeglab_practice.m','eeglab_diagnostics.m','diagnostic-sources.json','validate_desktop_update.m')){[IO.File]::WriteAllText((Join-Path $fixture ('desktop\'+$name)),'% test fixture')}
 $fakeMatlab=Join-Path $OutputDirectory 'matlab.exe';[IO.File]::WriteAllText($fakeMatlab,'fixture only; never executed')
 $before=(Get-FileHash -LiteralPath (Join-Path $homeRoot 'state.json')).Hash
 function Test-DesktopCandidate { param($Folder,$MatlabExe); throw 'Simulated MATLAB validation failure' }

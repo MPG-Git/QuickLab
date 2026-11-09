@@ -1,0 +1,21 @@
+name: Test private GitHub report delivery
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: eeglab-report-delivery
+  cancel-in-progress: false
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node self-test.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

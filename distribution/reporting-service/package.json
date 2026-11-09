@@ -1,0 +1,7 @@
+{
+  "name": "eeglab-private-reporting",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test service.test.mjs database.test.mjs github-identity.test.mjs" },
+  "devDependencies": { "@electric-sql/pglite": "0.5.16" }
+}

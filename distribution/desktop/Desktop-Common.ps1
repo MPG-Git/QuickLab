@@ -2,6 +2,8 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+$reportingHelpers=Join-Path $PSScriptRoot 'Reporting-Common.ps1'
+if (Test-Path -LiteralPath $reportingHelpers) { . $reportingHelpers }
 
 function Open-DesktopLock([string]$HomeRoot) {
     [IO.Directory]::CreateDirectory($HomeRoot) | Out-Null
@@ -35,9 +37,15 @@ function Start-DesktopMatlab($State,[string]$Mode='open') {
     $logs = Join-Path $folder 'logs'
     [IO.Directory]::CreateDirectory($logs) | Out-Null
     $log = Join-Path $logs ($Mode + '-' + [DateTime]::Now.ToString('yyyyMMdd-HHmmssfff') + '.log')
-    $arguments = '-desktop -sd "' + $folder + '" -logfile "' + $log + '" -r "' + $command + '"'
+    $arguments = '-wait -desktop -sd "' + $folder + '" -logfile "' + $log + '" -r "' + $command + '"'
     Write-Output 'Opening MATLAB and EEGLAB. This can take a minute...'
-    Start-Process -FilePath $State.matlabExe -ArgumentList $arguments -WorkingDirectory $folder -WindowStyle Normal | Out-Null
+    $matlabProcess=Start-Process -FilePath $State.matlabExe -ArgumentList $arguments -WorkingDirectory $folder -WindowStyle Normal -PassThru
+    $reportingWorker=Join-Path $folder 'setup\desktop\Reporting-Worker.ps1'
+    if (Test-Path -LiteralPath $reportingWorker) {
+        $managedHome=Split-Path -Parent (Split-Path -Parent $folder)
+        $workerArgs='-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "'+$reportingWorker+'" -HomeRoot "'+$managedHome+'" -VersionRoot "'+$folder+'" -MatlabProcessId '+$matlabProcess.Id
+        try { Start-Process -FilePath (Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe') -ArgumentList $workerArgs -WindowStyle Hidden | Out-Null } catch { }
+    }
 }
 function Test-DesktopCandidate([string]$Folder,[string]$MatlabExe) {
     $log = Join-Path $Folder 'setup-validation.log'
@@ -72,7 +80,7 @@ function Install-DesktopVersion([string]$HomeRoot,[string]$Source,[string]$Matla
     & (Join-Path $Source 'Install-EEGLAB.ps1') -Destination $candidate -Cache $Cache | ForEach-Object { Write-Host $_ }
     $setup = Join-Path $candidate 'setup'
     Copy-Item -LiteralPath $Source -Destination $setup -Recurse
-    foreach ($name in 'eeglab_desktop_start.m','eeglab_practice.m','validate_desktop_update.m') {
+    foreach ($name in 'eeglab_desktop_start.m','eeglab_practice.m','eeglab_diagnostics.m','diagnostic-sources.json','validate_desktop_update.m') {
         Copy-Item -LiteralPath (Join-Path $Source ('desktop\' + $name)) -Destination (Join-Path $candidate $name)
     }
     Test-DesktopCandidate $candidate $MatlabExe | ForEach-Object { Write-Host $_ }

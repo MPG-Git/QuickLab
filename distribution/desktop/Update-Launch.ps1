@@ -14,6 +14,7 @@ try {
     }
     $update = $null
     try { $update = Get-DesktopUpdate $state } catch {
+        if (Get-Command Write-DesktopDiagnostic -ErrorAction SilentlyContinue) { Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 20 }
         [IO.File]::AppendAllText((Join-Path $HomeRoot 'update-check.log'),[DateTime]::UtcNow.ToString('o') + ' Update check unavailable.' + [Environment]::NewLine)
     }
     $deferred = $update -and $state.deferredVersion -eq $update.version -and $state.deferredUntilUtc -and [DateTime]::Parse($state.deferredUntilUtc).ToUniversalTime() -gt [DateTime]::UtcNow
@@ -37,6 +38,7 @@ try {
                 if ($worker.ExitCode -ne 0) { throw ('Update validation failed. Details: ' + $job + '.error.log') }
                 $state = Read-DesktopState $HomeRoot
             } catch {
+                if (Get-Command Write-DesktopDiagnostic -ErrorAction SilentlyContinue) { Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 21 }
                 [IO.File]::AppendAllText((Join-Path $HomeRoot 'update-check.log'),[DateTime]::UtcNow.ToString('o') + ' ' + $_.Exception.Message + [Environment]::NewLine)
                 [Windows.Forms.MessageBox]::Show("The update could not finish. Your previous version will open.`n`nPlease send Matt a picture of this message:`n" + $_.Exception.Message,'EEGLAB update needs help') | Out-Null
                 $state = Read-DesktopState $HomeRoot
