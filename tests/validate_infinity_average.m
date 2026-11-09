@@ -10,10 +10,11 @@ cleanupPath = onCleanup(@() path(oldPath)); %#ok<NASGU>
 repo = fileparts(fileparts(mfilename('fullpath')));
 plugin = fullfile(repo,'QuickLab_11.12.21_NL');
 addpath(eeglabRoot, genpath(fullfile(eeglabRoot,'functions')));
-restRoot = pluginFolder(eeglabRoot,'dong_getleadfield.m');
+restRoot = pluginFolder(eeglabRoot,'dong_calc_leadfield3.m');
 restFieldtrip = pluginFolder(eeglabRoot,'pop_refrefinf.m');
 dipfitRoot = pluginFolder(eeglabRoot,'eeglab2fieldtrip.m');
-fieldtripRoot = pluginFolder(eeglabRoot,'ft_defaults.m');
+% Fileio also ships ft_defaults, but cannot perform source reconstruction.
+fieldtripRoot = pluginFolder(eeglabRoot,'ft_defaults.m','ft_sourceanalysis.m');
 addpath(restRoot,restFieldtrip,dipfitRoot,fieldtripRoot);
 ft_defaults;
 addpath(plugin,'-begin');
@@ -35,11 +36,15 @@ assert(isequal(size(xyz),[base.nbchan 3]) && all(isfinite(xyz(:))));
 directions = bsxfun(@rdivide,xyz,sqrt(sum(xyz.^2,2)));
 % EEGLAB nose +X / left +Y -> REST nose +Y / left -X, unit scalp sphere.
 pos = [-directions(:,2) directions(:,1) directions(:,3)];
-geometry.chanlocs = struct('labels',labels(:),'X',num2cell(pos(:,1)), ...
-    'Y',num2cell(pos(:,2)),'Z',num2cell(pos(:,3)));
-G = dong_getleadfield(geometry,1:base.nbchan).';
-assert(isequal(size(G),[base.nbchan 3000]) && all(isfinite(G(:))));
+% Use the official REST 1.2 public functions; dong_getleadfield is absent
+% from its catalog ZIP. Parameters match the REST GUI's standard model.
 dipoles = load(fullfile(restRoot,'corti869-3000dipoles.dat'),'-ascii');
+orientations = bsxfun(@rdivide,dipoles,sqrt(sum(dipoles.^2,2)));
+orientations(2601:3000,:) = repmat([0 0 1],400,1);
+headmodel = struct('type','concentricspheres','o',[0 0 0], ...
+    'r',[.87 .92 1],'cond',[1 .0125 1],'tissue',{{'brain','skull','scalp'}});
+G = dong_calc_leadfield3(pos,dipoles,orientations,headmodel);
+assert(isequal(size(G),[base.nbchan 3000]) && all(isfinite(G(:))));
 rmax = max(sqrt(sum(dipoles.^2,2)));
 if rmax >= .87, dipoles = dipoles*(.869/rmax); end
 model.pos = 85*dipoles; model.unit = 'mm'; model.coordsys = 'ras';
@@ -64,7 +69,7 @@ infinity.ref = 'Infinity'; infinity.setname = 'Sample EEG - Infinity (REST)';
 storedDifference = double(infinity.data)-double(average.data);
 expectedRMS = sqrt(mean(reshape(storedDifference,base.nbchan,[]).^2,2));
 % Independently compare the FieldTrip result to the REST toolbox routine.
-nativeREST = dong_rest_refer(reshape(double(average.data),base.nbchan,[]),G.');
+nativeREST = rest_refer(reshape(double(average.data),base.nbchan,[]),G.');
 nativeError = max(abs(nativeREST(:)-double(infinity.data(:))));
 assert(nativeError < 1e-4,'FieldTrip Infinity differs from the REST reference calculation.');
 assert(max(expectedRMS) > 1e-3,'Fixture does not distinguish Infinity from Average.');
@@ -121,8 +126,11 @@ fprintf(fid,'%s\n',jsonencode(result));
 disp(result);
 end
 
-function folder = pluginFolder(root, file)
+function folder = pluginFolder(root, file, requiredFile)
 matches = dir(fullfile(root,'plugins','*',file));
+if nargin > 2
+    matches = matches(arrayfun(@(m) exist(fullfile(m.folder,requiredFile),'file') == 2,matches));
+end
 assert(numel(matches)==1,'Expected exactly one installed %s under EEGLAB/plugins.',file);
 folder = matches(1).folder;
 end

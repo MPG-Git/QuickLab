@@ -4,6 +4,11 @@ The plugin is in `QuickLab_11.12.21_NL`. The November 2026 comparison update
 restores **Plot Last Files Data Differences** and adds a chooser for comparing
 stored Infinity- and Average-referenced versions of the same recording.
 
+For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distribution/README.md).
+It downloads all 53 plugins from the supplied startup inventory, consolidates
+duplicates, and includes the QuickLab/NeuroLode synthetic examples. See its
+[inventory](distribution/PLUGIN_INVENTORY.md) and [validation limits](distribution/VALIDATION.md).
+
 ## Install or update
 
 1. Download this repository using **Code > Download ZIP**, or pull the latest

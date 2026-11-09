@@ -1,0 +1,56 @@
+# Validation of the EEGLAB replacement build
+
+Checked 9 November 2026, Windows, MATLAB R2023b Update 3, EEGLAB 2026.1.0.
+
+| Check | Result |
+| --- | --- |
+| Official release and 53 plugin downloads | ZIP integrity and SHA-256 recorded |
+| Final installer | Passed under Windows PowerShell 5.1 |
+| Startup inventory | 53/53 inventoried plugins registered; bundled EEG-BIDS also registered |
+| Final launcher | One active EEGLAB root; QuickLab, ERPsource and TBT menu checks passed |
+| Supplemental paths | MWF, SPM and PICARD resolve; FieldTrip-lite selected ahead of Fileio |
+| Plugin startup errors | None with clean MATLAB preferences |
+| Previously failing NeuroLode and ERPsource hooks | Both loaded successfully |
+| QuickLab regression suite | 20/20 passed on EEGLAB 2026.1.0 |
+| Installed QuickLab synthetic example | Passed; mean 2 µV, RMS 2.121320344 µV |
+| Installed NeuroLode synthetic example | Passed; export error below 1e-6, centroids 10/15/20 Hz |
+| REST Infinity versus Average calculation | Passed; overall RMS 4.9011112535494 |
+| Independent REST versus FieldTrip reconstruction | Maximum error 8.5265e-14 |
+| Between-channel voltage preservation | Maximum residual 7.4607e-14 |
+
+The final installer was rerun into a new directory, excluding four legacy
+QuickLab recordings outside its synthetic example. Its installed
+`run_replacement_examples` entry point passed both examples. The example
+plots and REST RMS plot were visually inspected.
+
+The REST test uses 30 scalp channels and four epochs from EEGLAB's public
+`eeglab_data_epochs_ica.set`, with REST's three-sphere/3,000-dipole leadfield.
+It compares the official `rest_refer` result with REST_fieldtrip
+`pop_refrefinf`, then verifies QuickLab's stored differences and plots. Its
+runner is `tests/validate_infinity_average.m` in the QuickLab repository.
+The runner now uses functions present in the official REST ZIP and distinguishes
+FieldTrip from Fileio, which also ships a file named `ft_defaults.m`.
+
+The initial test computer had a corrupt `matlabprefs.mat`, which prevented
+MICROSTATELAB from loading. Repeating with a separate, clean preferences
+directory resolved that environment failure without changing user preferences
+or plugin source. A local Perl locale/path warning remained. Startup was tested
+with real MATLAB figure support; EEGLAB's `getframe` startup cannot run under
+`-noFigureWindows` in this environment.
+
+## What this does not establish
+
+Plugin registration and these examples do not test all third-party algorithms,
+every menu action, or scientific suitability for a study. CUDAICA's GPU/runtime
+setup and 2026 GUI integration are unverified. AMICA/native executables,
+device-specific importers, SPM analyses, and complete RELAX pipelines have not
+been run as part of this installation test. MWF is included as a RELAX
+dependency; MATLAB toolbox licenses and method-specific configuration remain
+necessary. The exact version of David's old SPM and his unrecorded custom menu
+edits cannot be determined from the log.
+
+The NeuroLode synthetic workflow checks loading, export, continuous conversion,
+and spectral centroids. Its full manual GUI/export/history checklist is not
+completed by these automated checks. David's own recordings and computer were
+not used. Keep the old application archived until his normal workflows pass
+with the new installation.

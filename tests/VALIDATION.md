@@ -54,3 +54,15 @@ Its reference comparisons passed: mean difference 2 microvolts and RMS
 2.12132034355964 microvolts. The comparison implementation and synthetic input
 files were unchanged. The real-REST integration results above remain the
 7 November run, not a new test of a user's full plugin collection.
+## Replacement installation, 9 November 2026
+
+The same 20-test suite also passed with official EEGLAB **2026.1.0**. The actual
+REST Infinity/Average integration passed with the catalog REST 1.2 ZIP and
+FieldTrip-lite 250523: overall RMS 4.9011112535494, independent REST maximum
+error 8.5265e-14. The integration runner now uses `dong_calc_leadfield3` and
+`rest_refer`, which are present in that ZIP, and selects FieldTrip using its
+source-analysis entry point so Fileio's `ft_defaults` is not mistaken for it.
+
+Both installed synthetic examples passed after loading the complete plugin
+collection. See [distribution validation](../distribution/VALIDATION.md) for
+startup coverage and remaining third-party/hardware/manual workflow limits.

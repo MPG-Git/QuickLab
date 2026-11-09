@@ -1,5 +1,12 @@
 # Fix duplicate EEGLAB paths and plugin installations
 
+## Replacing the old installation
+
+To replace an older installation, follow the [EEGLAB 2026.1.0 setup guide](distribution/README.md).
+Its installer creates a separate build with the 53-plugin inventory and a
+launcher that selects one EEGLAB root. The troubleshooting guidance below is
+also useful for maintaining an existing installation.
+
 Use this guide when startup reports more than one EEGLAB installation, repeated
 QuickLab/DIPFIT entries, an old NeuroLode version, or errors while adding plugins.
 The startup log is an inventory, not a successful test of every plugin.

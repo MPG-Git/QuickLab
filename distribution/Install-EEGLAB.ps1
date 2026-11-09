@@ -1,0 +1,94 @@
+<#
+.SYNOPSIS
+Build a separate EEGLAB 2026.1.0 installation with the 53-plugin inventory.
+.EXAMPLE
+powershell -File .\Install-EEGLAB.ps1 -Destination C:\EEGLAB_2026_New
+#>
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)][string]$Destination,
+    [string]$Cache = (Join-Path $env:LOCALAPPDATA 'EEGLAB-download-cache')
+)
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$manifestPath = Join-Path $PSScriptRoot 'manifest.json'
+$manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+$target = [IO.Path]::GetFullPath($Destination)
+if (Test-Path -LiteralPath $target) {
+    throw 'Destination already exists. Choose a new empty destination; existing installations are never overwritten.'
+}
+New-Item -ItemType Directory -Path $target | Out-Null
+New-Item -ItemType Directory -Path $Cache -Force | Out-Null
+$Cache = [IO.Path]::GetFullPath($Cache)
+
+function Get-VerifiedArchive($item, [string]$cacheName) {
+    $zipPath = Join-Path $Cache $cacheName
+    if (-not (Test-Path -LiteralPath $zipPath)) {
+        Write-Host "Downloading $($item.name) $($item.version)..."
+        Invoke-WebRequest -UseBasicParsing -Uri $item.url -OutFile ($zipPath + '.partial')
+        Move-Item -LiteralPath ($zipPath + '.partial') -Destination $zipPath
+    }
+    if ((Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash -ne $item.sha256) {
+        throw "Checksum mismatch: $zipPath. The upstream archive may have changed; do not use this incomplete installation."
+    }
+    return $zipPath
+}
+
+function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$destination, [switch]$Core, [switch]$SyntheticOnly) {
+    $fullDestination = [IO.Path]::GetFullPath($destination)
+    $boundary = $fullDestination.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    [IO.Directory]::CreateDirectory($fullDestination) | Out-Null
+    $zip = [IO.Compression.ZipFile]::OpenRead($zipPath)
+    $count = 0
+    try {
+        foreach ($entry in $zip.Entries) {
+            $name = $entry.FullName.Replace('\','/')
+            if (-not $name.StartsWith($prefix, [StringComparison]::Ordinal)) { continue }
+            $relative = $name.Substring($prefix.Length)
+            if (-not $relative -or $relative.EndsWith('/') -or $relative.StartsWith('__MACOSX/')) { continue }
+            # Replace the four bundled plugins from the pinned plugin archives.
+            # EEG-BIDS remains as supplied by the official EEGLAB distribution.
+            if ($Core -and $relative -match '^plugins/' -and $relative -notmatch '^plugins/EEG-BIDS/') { continue }
+            # Legacy QuickLab recordings have no synthetic-data provenance.
+            if ($SyntheticOnly -and $relative -match '\.(set|fdt)$' -and $relative -notmatch '^examples/synthetic/') { continue }
+            $path = [IO.Path]::GetFullPath((Join-Path $fullDestination $relative))
+            if (-not $path.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Archive entry escapes its destination: $name"
+            }
+            [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($path)) | Out-Null
+            [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $path, $false)
+            $count++
+        }
+    } finally { $zip.Dispose() }
+    if ($count -eq 0) { throw "No files extracted from $zipPath with prefix $prefix" }
+    return $count
+}
+
+# A failed build has no COMPLETE.json marker and must not be used.
+$core = Join-Path $target 'eeglab2026.1.0'
+$archive = Get-VerifiedArchive $manifest.base 'eeglab2026.1.0.zip'
+$null = Expand-SelectedArchive $archive $manifest.base.archive_root $core -Core
+$installed = @()
+foreach ($plugin in $manifest.plugins) {
+    $archive = Get-VerifiedArchive $plugin ($plugin.name + '.zip')
+    $folder = Join-Path (Join-Path $core 'plugins') $plugin.folder
+    $count = Expand-SelectedArchive $archive $plugin.archive_root $folder -SyntheticOnly:($plugin.name -eq 'QuickLab')
+    $installed += [pscustomobject]@{name=$plugin.name;version=$plugin.version;files=$count;sha256=$plugin.sha256}
+    Write-Host "Installed $($plugin.name) $($plugin.version) ($count files)"
+}
+foreach ($dependency in $manifest.dependencies) {
+    $archive = Get-VerifiedArchive $dependency ($dependency.name + '.zip')
+    $folder = Join-Path (Join-Path $target 'dependencies') $dependency.folder
+    $null = Expand-SelectedArchive $archive $dependency.archive_root $folder
+    Write-Host "Installed supplemental dependency $($dependency.name)"
+}
+Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $target 'manifest.json')
+foreach ($file in 'start_eeglab_replacement.m','check_eeglab_replacement.m','run_replacement_examples.m','README.md','VALIDATION.md','PLUGIN_INVENTORY.md') {
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot $file) -Destination (Join-Path $target $file)
+}
+$installed | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $target 'COMPLETE.json') -Encoding UTF8
+Write-Host "Installed $($installed.Count) inventoried plugins plus bundled EEG-BIDS."
+Write-Host "In a new MATLAB session, change to $target and run start_eeglab_replacement."
+Write-Host 'Download/install success is not a claim that every plugin workflow has been tested.'
