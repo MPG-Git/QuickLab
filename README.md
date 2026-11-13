@@ -8,7 +8,10 @@ For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distri
 The desktop installer finds MATLAB, creates shortcuts, and checks GitHub for
 tested updates. Updates are validated before activation, with a previous-version
 shortcut for rollback.
-Desktop version **1.2.0** fixes the FieldTrip startup warning and misleading
+Desktop version **1.2.1** adds automatic update-failure details: failed step,
+component, native codes, software environment, plugin validation failures and
+safe code locations. With reporting enabled, sending starts before the error
+dialog and does not require MATLAB to open. It retains the 1.2.0 fixes for the FieldTrip startup warning and misleading
 plugin update labels, identifies our maintained edition as QuickLabMPG 1.0.0,
 and updates SPM to 26.10.01. Existing users can close MATLAB, open the
 **EEGLAB 2026** shortcut, and click **Yes**. It also provides **Get error report**
