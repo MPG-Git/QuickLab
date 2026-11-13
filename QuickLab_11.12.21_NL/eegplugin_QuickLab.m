@@ -1,4 +1,4 @@
-% eegplugin_QuickLab() - QuickLab plugin version 0.1 for EEGLAB menu.
+% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.0.0.
 %                        QuickLab is a compilation of modified EEGLAB functions
 %                        for experienced users that wish to speed up manual
 %                        process, made by Ugo Bruzadin Nunes in
@@ -24,7 +24,9 @@
 function vers = eegplugin_QuickLab(fig, try_strings, catch_strings)
 
 % EEGLAB parses a textual version. A numeric value is displayed as v?.
-vers = '0.1';
+% Install in QuickLabMPG1.0.0 to distinguish this maintained fork from the
+% historical QuickLab 0.91 catalog package. The menu remains "QuickLab".
+vers = '1.0.0';
 if nargin < 1 || isempty(fig), return; end
 % Repeated discovery must not create a second copy of this build's menu.
 % Duplicate installations still need to be removed from the MATLAB path.
