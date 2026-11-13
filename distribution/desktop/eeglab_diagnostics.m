@@ -39,6 +39,10 @@ switch action
         try
             if isempty(catalog), catalog = jsondecode(fileread(fullfile(root,'diagnostic-sources.json'))); end
             record = makeRecord(varargin{1},varargin{2},root,catalog);
+            if numel(varargin)>=3
+                record.schemaVersion=2; record.update=varargin{3};
+                assert(validRecord(record,catalog),'Invalid structured update report.');
+            end
             [base,history,queue] = folders(root);
             saveRecord(history,record);
             if consent(base), saveRecord(queue,record); end
@@ -65,6 +69,7 @@ switch action
         end
         choice = questdlg({'Allow automatic technical error reports to Matt?', ...
             'Reports contain error codes, software versions and locations in plugin code.', ...
+            'Update reports also identify the failed step, plugin and technical system codes.', ...
             'They go through Matt''s Supabase service to his private GitHub support repository.', ...
             'Recordings, commands, names, file paths and error-message text are not sent.', ...
             'Internet providers still process normal connection information.', ...
@@ -105,6 +110,16 @@ switch action
             for j=1:numel(r.frames)
                 name=reportCatalog.sources.(['s' r.frames(j).sourceId]);
                 fprintf(fid,'  %s, line %d\n',name,r.frames(j).line);
+            end
+            if r.schemaVersion==2
+                d=r.update;
+                fprintf(fid,'  Update %s | step %s | component %s | reason %s\n',d.targetVersion,d.stage,d.component,d.reason);
+                fprintf(fid,'  HTTP %d | exit %d | Windows HRESULT %d | %s line %d\n',d.httpStatus,d.exitCode,d.systemCode,d.source,d.line);
+                fprintf(fid,'  MATLAB identifier: %s | build %s | Windows API %s | PowerShell %s | %s | free MB %d\n',d.matlabIdentifier,d.environment.matlabVersion,d.environment.windowsVersion,d.environment.powershellVersion,d.environment.architecture,d.environment.freeDiskMB);
+                for j=1:numel(d.startupSignals), fprintf(fid,'  Recognized startup message: %s\n',d.startupSignals{j}); end
+                for j=1:numel(d.pluginFailures)
+                    fprintf(fid,'  Plugin check: %s | %s\n',d.pluginFailures(j).component,d.pluginFailures(j).reason);
+                end
             end
             fprintf(fid,'\n');
         end
@@ -188,19 +203,57 @@ valid=false;
 try
     catalog=selectCatalog(catalog,r.release);
     names=sort({'schemaVersion';'eventId';'observedAt';'release';'matlabRelease';'context';'errorCode';'frames'});
+    if r.schemaVersion==2, names=sort([names;{'update'}]); end
     assert(isequal(sort(fieldnames(r)),names));
-    assert(r.schemaVersion==1 && strcmp(r.release,catalog.release));
+    assert(any(r.schemaVersion==[1 2]) && strcmp(r.release,catalog.release));
     assert(~isempty(regexp(r.eventId,'^[a-f0-9]{32}$','once')));
     assert(~isempty(regexp(r.observedAt,'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$','once')));
-    assert(~isempty(regexp(r.matlabRelease,'^\d{4}[ab]$','once')));
+    assert(~isempty(regexp(r.matlabRelease,'^\d{4}[ab]$','once')) || (r.schemaVersion==2 && strcmp(r.matlabRelease,'unknown')));
     assert(any(strcmp(r.context,{'startup','practice','runtime','update','validation'})));
+    if r.schemaVersion==2
+        assert(any(strcmp(r.context,{'update','validation'})) && validUpdate(r.update,catalog));
+    end
     assert(isscalar(r.errorCode) && r.errorCode==fix(r.errorCode) && r.errorCode>=0 && r.errorCode<=22);
     assert(numel(r.frames)<=8);
     for k=1:numel(r.frames)
         frame=r.frames(k);
+        if iscell(frame), frame=frame{1}; end
         assert(isequal(sort(fieldnames(frame)),{'line';'sourceId'}));
         assert(~isempty(regexp(frame.sourceId,'^[a-f0-9]{32}$','once')) && isfield(catalog.sources,['s' frame.sourceId]));
         assert(isscalar(frame.line) && isfinite(frame.line) && frame.line==fix(frame.line) && frame.line>=1 && frame.line<=1000000);
+    end
+    valid=true;
+catch
+end
+end
+
+function valid=validUpdate(d,catalog)
+valid=false;
+try
+    assert(isequal(sort(fieldnames(d)),sort({'targetVersion';'stage';'component';'reason';'httpStatus';'exitCode';'systemCode';'source';'line';'pluginFailures';'matlabIdentifier';'startupSignals';'environment'})));
+    assert(ischar(d.targetVersion) && numel(d.targetVersion)<=32 && ~isempty(regexp(d.targetVersion,'^(unknown|\d+\.\d+\.\d+)$','once')));
+    assert(any(strcmp(d.stage,{'check','download','integrity','extract','install','startup','validation','practice','activate','worker'})));
+    assert(any(strcmp(d.reason,{'unknown','network','http','tls','timeout','hash-mismatch','archive-invalid','access-denied','disk-full','path-too-long','file-in-use','matlab-launch','matlab-exit','validation-failed','metadata-invalid','source-missing'})));
+    assert(any(strcmp(d.component,catalog.components)));
+    assert(strcmp(d.matlabIdentifier,'') || any(strcmp(d.matlabIdentifier,catalog.identifiers)));
+    assert(numel(d.startupSignals)<=6 && (isempty(d.startupSignals) || (iscell(d.startupSignals) && all(ismember(d.startupSignals,{'license-failure','matlab-crash','missing-library','invalid-mex','missing-validation-function','out-of-memory'})))));
+    e=d.environment;
+    assert(isequal(sort(fieldnames(e)),{'architecture';'freeDiskMB';'matlabVersion';'powershellVersion';'windowsVersion'}));
+    for key={'matlabVersion','windowsVersion','powershellVersion'}
+        s=e.(key{1}); assert(ischar(s) && numel(s)<=40 && ~isempty(regexp(s,'^(unknown|\d+(\.\d+){1,4})$','once')));
+    end
+    assert(any(strcmp(e.architecture,{'x64','x86','arm64','unknown'})) && isnumeric(e.freeDiskMB) && isscalar(e.freeDiskMB) && isfinite(e.freeDiskMB) && e.freeDiskMB==fix(e.freeDiskMB) && e.freeDiskMB>=-1 && e.freeDiskMB<=1000000000);
+    for name={'httpStatus','exitCode','systemCode','line'}
+        n=d.(name{1}); assert(isnumeric(n) && isscalar(n) && isfinite(n) && n==fix(n));
+    end
+    assert(d.httpStatus==0 || (d.httpStatus>=100 && d.httpStatus<=599));
+    assert(d.exitCode>=-2147483648 && d.exitCode<=2147483647 && d.systemCode>=-2147483648 && d.systemCode<=2147483647);
+    assert(d.line>=0 && d.line<=1000000 && any(strcmp(d.source,{'','Desktop-Common.ps1','Install-EEGLAB.ps1','Apply-DesktopUpdate.ps1','Update-Launch.ps1','Complete-DesktopSetup.ps1'})));
+    assert(numel(d.pluginFailures)<=60);
+    for k=1:numel(d.pluginFailures)
+        p=d.pluginFailures(k); if iscell(p), p=p{1}; end
+        assert(isequal(sort(fieldnames(p)),{'component';'reason'}));
+        assert(any(strcmp(p.component,catalog.components)) && any(strcmp(p.reason,{'missing','unregistered','startup','version'})));
     end
     valid=true;
 catch

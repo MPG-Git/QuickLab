@@ -47,26 +47,31 @@ function Start-DesktopMatlab($State,[string]$Mode='open') {
         try { Start-Process -FilePath (Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe') -ArgumentList $workerArgs -WindowStyle Hidden | Out-Null } catch { }
     }
 }
-function Test-DesktopCandidate([string]$Folder,[string]$MatlabExe) {
+function Test-DesktopCandidate([string]$Folder,[string]$MatlabExe,$Diagnostic=$null) {
+    Set-UpdateStage $Diagnostic 'validation'
     $log = Join-Path $Folder 'setup-validation.log'
     Write-Output 'Checking the installation in MATLAB. Practice windows may open briefly...'
     $arguments = '-wait -sd "' + $Folder + '" -logfile "' + $log + '" -batch "validate_desktop_update"'
-    $process = Start-Process -FilePath $MatlabExe -ArgumentList $arguments -WorkingDirectory $Folder -WindowStyle Hidden -PassThru
+    try { $process = Start-Process -FilePath $MatlabExe -ArgumentList $arguments -WorkingDirectory $Folder -WindowStyle Hidden -PassThru }
+    catch { if ($Diagnostic) { $Diagnostic.reason='matlab-launch' }; throw }
     $deadline = [DateTime]::UtcNow.AddMinutes(10)
     while (-not $process.WaitForExit(250)) {
         if ('Windows.Forms.Application' -as [type]) { [Windows.Forms.Application]::DoEvents() }
-        if ([DateTime]::UtcNow -gt $deadline) { $process.Kill(); throw "MATLAB validation timed out. The earlier version is unchanged. Details: $log" }
+        if ([DateTime]::UtcNow -gt $deadline) { $process.Kill(); if ($Diagnostic) { $Diagnostic.reason='timeout' }; throw "MATLAB validation timed out. The earlier version is unchanged. Details: $log" }
     }
     $resultFile = Join-Path $Folder 'desktop_validation.json'
-    if ($process.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $resultFile)) { throw "MATLAB could not validate the update. The earlier version is unchanged. Details: $log" }
+    if ($Diagnostic) { $Diagnostic.exitCode=[int]$process.ExitCode; $Diagnostic.startupSignals=@(Read-MatlabStartupSignals $log) }
+    if ($process.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $resultFile)) { if ($Diagnostic) { $Diagnostic.reason='matlab-exit' }; throw "MATLAB could not validate the update. The earlier version is unchanged. Details: $log" }
     $result = Get-Content -Raw -LiteralPath $resultFile | ConvertFrom-Json
     if ($result.status -ne 'PASS') { throw "The update did not pass its practice checks. Details: $log" }
 }
-function Install-DesktopVersion([string]$HomeRoot,[string]$Source,[string]$MatlabExe,[string]$Cache) {
+function Install-DesktopVersion([string]$HomeRoot,[string]$Source,[string]$MatlabExe,[string]$Cache,$Diagnostic=$null) {
+    Set-UpdateStage $Diagnostic 'install'
     $MatlabExe = [IO.Path]::GetFullPath($MatlabExe)
     if (-not (Test-Path -LiteralPath $MatlabExe -PathType Leaf) -or [IO.Path]::GetFileName($MatlabExe) -ne 'matlab.exe') { throw 'Please select the installed matlab.exe application.' }
     $release = Get-Content -Raw -LiteralPath (Join-Path $Source 'desktop\release.json') | ConvertFrom-Json
     Assert-DesktopRelease $release
+    if ($Diagnostic) { $Diagnostic.targetVersion=$release.version }
     $manifestHash = (Get-FileHash -LiteralPath (Join-Path $Source 'manifest.json') -Algorithm SHA256).Hash
     $state = Read-DesktopState $HomeRoot
     if ($state -and $state.current.version -eq $release.version -and $state.current.manifestSHA256 -eq $manifestHash -and (Test-Path -LiteralPath (Join-Path $state.current.path 'desktop_validation.json'))) {
@@ -77,13 +82,15 @@ function Install-DesktopVersion([string]$HomeRoot,[string]$Source,[string]$Matla
     $versions = Join-Path $HomeRoot 'versions'
     [IO.Directory]::CreateDirectory($versions) | Out-Null
     $candidate = Join-Path $versions ($release.version + '-' + [guid]::NewGuid().ToString('N').Substring(0,8))
-    & (Join-Path $Source 'Install-EEGLAB.ps1') -Destination $candidate -Cache $Cache | ForEach-Object { Write-Host $_ }
+    & (Join-Path $Source 'Install-EEGLAB.ps1') -Destination $candidate -Cache $Cache -Diagnostic $Diagnostic | ForEach-Object { Write-Host $_ }
+    Set-UpdateStage $Diagnostic 'install'
     $setup = Join-Path $candidate 'setup'
     Copy-Item -LiteralPath $Source -Destination $setup -Recurse
     foreach ($name in 'eeglab_desktop_start.m','eeglab_practice.m','eeglab_diagnostics.m','diagnostic-sources.json','validate_desktop_update.m') {
         Copy-Item -LiteralPath (Join-Path $Source ('desktop\' + $name)) -Destination (Join-Path $candidate $name)
     }
-    Test-DesktopCandidate $candidate $MatlabExe | ForEach-Object { Write-Host $_ }
+    Test-DesktopCandidate $candidate $MatlabExe -Diagnostic $Diagnostic | ForEach-Object { Write-Host $_ }
+    Set-UpdateStage $Diagnostic 'activate'
     $previous = $null
     if ($state) { $previous = $state.current }
     $state = [pscustomobject]@{
@@ -128,12 +135,15 @@ function Get-DesktopUpdate($State) {
     }
     return $eligible | Sort-Object { [version]$_.version } -Descending | Select-Object -First 1
 }
-function Get-DesktopUpdateSource([string]$HomeRoot,$Update) {
+function Get-DesktopUpdateSource([string]$HomeRoot,$Update,$Diagnostic=$null) {
+    Set-UpdateStage $Diagnostic 'download'
     $folder = Join-Path $HomeRoot ('updates\' + [guid]::NewGuid().ToString('N'))
     [IO.Directory]::CreateDirectory($folder) | Out-Null
     $archive = Join-Path $folder 'update.zip'
     Invoke-WebRequest -UseBasicParsing -Uri $Update.url -OutFile $archive -TimeoutSec 180
-    if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $Update.sha256) { throw 'The update download failed its integrity check.' }
+    Set-UpdateStage $Diagnostic 'integrity'
+    if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $Update.sha256) { if ($Diagnostic) { $Diagnostic.reason='hash-mismatch' }; throw 'The update download failed its integrity check.' }
+    Set-UpdateStage $Diagnostic 'extract'
     $source = Join-Path $folder 'payload'
     [IO.Directory]::CreateDirectory($source) | Out-Null
     $zip = [IO.Compression.ZipFile]::OpenRead($archive)
@@ -141,14 +151,15 @@ function Get-DesktopUpdateSource([string]$HomeRoot,$Update) {
         foreach ($entry in $zip.Entries) {
             if ($entry.FullName.EndsWith('/')) { continue }
             $path = [IO.Path]::GetFullPath((Join-Path $source $entry.FullName))
-            if (-not $path.StartsWith($source + '\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid update archive path.' }
+            if (-not $path.StartsWith($source + '\',[StringComparison]::OrdinalIgnoreCase)) { if ($Diagnostic) { $Diagnostic.reason='archive-invalid' }; throw 'Invalid update archive path.' }
             [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($path)) | Out-Null
             [IO.Compression.ZipFileExtensions]::ExtractToFile($entry,$path,$false)
         }
     } finally { $zip.Dispose() }
     $release = Get-Content -Raw -LiteralPath (Join-Path $source 'desktop\release.json') | ConvertFrom-Json
-    Assert-DesktopRelease $release
-    if ($release.version -ne $Update.version -or $release.tag -ne $Update.tag) { throw 'The update package does not match its release.' }
+    try { Assert-DesktopRelease $release
+        if ($release.version -ne $Update.version -or $release.tag -ne $Update.tag) { throw 'The update package does not match its release.' }
+    } catch { if ($Diagnostic) { $Diagnostic.reason='metadata-invalid' }; throw }
     return $source
 }
 function Undo-DesktopUpdate([string]$HomeRoot,$State) {

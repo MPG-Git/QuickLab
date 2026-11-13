@@ -12,6 +12,7 @@ $zip = [IO.Compression.ZipFile]::Open($zipPath,[IO.Compression.ZipArchiveMode]::
 try {
     $files = @('Install-EEGLAB.ps1','manifest.json','README.md','VALIDATION.md','PLUGIN_INVENTORY.md','start_eeglab_replacement.m','check_eeglab_replacement.m','run_replacement_examples.m','desktop/Complete-DesktopSetup.ps1','desktop/eeglab_desktop_start.m','desktop/eeglab_practice.m','desktop/release.json','desktop/Launch-EEGLAB.ps1','desktop/Desktop-Common.ps1','desktop/Update-Launch.ps1','desktop/validate_desktop_update.m')
     $files += 'desktop/Apply-DesktopUpdate.ps1'
+    $files += 'desktop/Update-Diagnostics.ps1'
     $files += 'VERSION_AUDIT.md'
     $files += 'desktop/UPDATING.md'
     $files += @('desktop/Reporting-Common.ps1','desktop/Reporting-Worker.ps1','desktop/reporting.json','desktop/diagnostic-sources.json','desktop/eeglab_diagnostics.m','desktop/REPORTING.md')

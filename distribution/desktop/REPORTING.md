@@ -20,6 +20,16 @@ locations from an allowlist of shipped source files. They do not contain raw
 exception messages, commands, variable values, EEG, recordings, screenshots,
 participant details, personal paths, usernames or hardware identifiers.
 Unknown error identifiers become code 0. Unknown source files are omitted.
+Desktop 1.2.1 additionally reports the update target, failed installation step,
+affected shipped component, failure category, numeric HTTP/Windows/process
+codes, MATLAB build, Windows API version, PowerShell version, process
+architecture, and free space on the installation disk. MATLAB validation
+reports include individual missing/unregistered/failed/version-mismatched
+plugins and an error identifier only when it is a literal in shipped public
+code. A bounded local log scan recognizes fixed categories such as licensing
+failure, native crash, missing library, invalid MEX, or out of memory; it never
+uploads the scanned text. These details distinguish actionable causes while
+preserving the existing promise that error-message text is not transmitted.
 Hosting/network providers process normal connection metadata, including IP
 addresses; the reporting database and GitHub issue do not receive/store an IP
 field from the application.
@@ -31,6 +41,17 @@ upload queue. The background sender retries approximately once a minute while
 the launched MATLAB session runs, and on the next launch. Each attempt is
 bounded and does not block an analysis. A service acknowledgment means the
 report is in its private queue; GitHub delivery follows separately.
+The 1.2.1 updater also starts a separate sender as soon as it records a failure,
+before showing its help dialog. It does not wait for MATLAB to open. A failed
+MATLAB candidate can send its own detailed validation report before activation,
+including when it was installed by an older launcher. Offline reports remain
+queued. An older launcher cannot report new details about failures that happen
+before it downloads this package; installing the new package once is necessary.
+A failed candidate's offline report may wait until a compatible launcher next
+runs. Existing reporting consent is honored; no account or manual log search is
+required. Raw logs remain local, and arbitrary/unrecognized error text is
+intentionally unavailable remotely. Some unfamiliar failures may still require
+follow-up rather than being fully diagnosable from one report.
 
 The maintainer's private GitHub repository collects queued reports on an hourly
 schedule (GitHub may delay scheduled runs). Repeated equivalent failures update

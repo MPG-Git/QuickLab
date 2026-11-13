@@ -12,8 +12,10 @@ $ProgressPreference = 'SilentlyContinue'
 . (Join-Path $PSScriptRoot 'Desktop-Common.ps1')
 $homeRoot = [IO.Path]::GetFullPath($Destination)
 $lock = Open-DesktopLock $homeRoot
+$detail=New-UpdateDetail
+$previousState=Read-DesktopState $homeRoot
 try {
-    $state = Install-DesktopVersion -HomeRoot $homeRoot -Source (Split-Path -Parent $PSScriptRoot) -MatlabExe $MatlabExe -Cache $Cache
+    $state = Install-DesktopVersion -HomeRoot $homeRoot -Source (Split-Path -Parent $PSScriptRoot) -MatlabExe $MatlabExe -Cache $Cache -Diagnostic $detail
     $launcherPath = Join-Path $homeRoot 'EEGLABLauncher.exe'
     if (-not (Test-Path -LiteralPath $launcherPath)) { Copy-Item -LiteralPath $LauncherExe -Destination $launcherPath }
     $shim = Join-Path $homeRoot 'Launch-EEGLAB.ps1'
@@ -22,4 +24,11 @@ try {
     Write-Output 'Installed. Use EEGLAB 2026 or EEGLAB Practice on your desktop.'
     if (-not $NoOpen) { Start-DesktopMatlab $state 'open' }
     Write-Output ('SETUP_COMPLETE=' + $state.current.path)
+} catch {
+    if ($previousState) {
+        $detail=Get-UpdateFailureDetail $_ $detail
+        Write-DesktopDiagnostic $homeRoot $previousState.current.path 'update' 21 $detail
+        Start-UpdateReportSender $homeRoot $previousState.current.path
+    }
+    throw
 } finally { $lock.Dispose() }

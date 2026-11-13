@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHandler, validateReport, fingerprint } from './service.mjs';
 import { collect } from './collect-reports.mjs';
 const sourceId='a'.repeat(32), identityToken='test-only-'.repeat(6);
-const catalog={release:'1.1.0',sources:{['s'+sourceId]:'eeglab2026.1.0/plugins/quicklab/example.m'}};
+const catalog={release:'1.1.0',components:['desktop','EEGLAB','QuickLab'],sources:{['s'+sourceId]:'eeglab2026.1.0/plugins/quicklab/example.m'}};
 const fresh=()=>({schemaVersion:1,eventId:'b'.repeat(32),observedAt:new Date().toISOString(),release:'1.1.0',matlabRelease:'2023b',context:'runtime',errorCode:1,frames:[{sourceId,line:42}]});
 const jsonResponse=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
 test('Strict allowlist accepts technical data and rejects personal/free-text fields',()=>{
@@ -52,8 +52,8 @@ test('Quota rejection leaves the client able to retry',async()=>{
   const result=await handler(new Request('https://test/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(fresh())}));
   assert.equal(result.status,429); assert.deepEqual(await result.json(),{accepted:false});
 });
-function deliveryFixture({privateRepo=true,issueNumber=null,ack=true}={}) {
-  const calls=[], group={fingerprint:'d'.repeat(64),sample:fresh(),count:2,firstSeen:new Date().toISOString(),lastSeen:new Date().toISOString(),issueNumber,leaseToken:'11111111-1111-4111-8111-111111111111'};
+function deliveryFixture({privateRepo=true,issueNumber=null,ack=true,sample=fresh()}={}) {
+  const calls=[], group={fingerprint:'d'.repeat(64),sample,count:2,firstSeen:new Date().toISOString(),lastSeen:new Date().toISOString(),issueNumber,leaseToken:'11111111-1111-4111-8111-111111111111'};
   const request=async(url,options)=>{
     calls.push({url,options});
     if(url.endsWith('/repos/owner/support')) return jsonResponse({private:privateRepo});
@@ -86,4 +86,28 @@ test('Public repositories are refused before reports are retrieved',async()=>{
 });
 test('Missing acknowledgment fails the run so the lease can retry later',async()=>{
   const {args}=deliveryFixture({ack:false}); await assert.rejects(collect(args),/acknowledgment/);
+});
+const detailed=()=>({...fresh(),schemaVersion:2,context:'update',errorCode:21,update:{targetVersion:'1.2.1',stage:'extract',component:'QuickLab',reason:'path-too-long',httpStatus:0,exitCode:1,systemCode:-2147024690,source:'Install-EEGLAB.ps1',line:60,pluginFailures:[],matlabIdentifier:'',startupSignals:[],environment:{matlabVersion:'23.2.0.2515942',windowsVersion:'10.0.26100.0',powershellVersion:'5.1.26100.0',architecture:'x64',freeDiskMB:12345}}});
+test('Update details reject arbitrary text at every nesting level and accept unknown MATLAB release',()=>{
+  assert.equal(validateReport(detailed(),catalog),true);
+  assert.equal(validateReport({...detailed(),matlabRelease:'unknown'},catalog),true);
+  for(const change of [{component:'Jane'},{reason:'SECRET'},{stage:'C:\\Users\\Jane'},
+    {rawLog:'PRIVATE'},{targetVersion:'patient.set'},{source:'personal.m'},
+    {line:Infinity},{httpStatus:600},{systemCode:'PRIVATE'},{exitCode:1.5},
+    {matlabIdentifier:'Patient:Jane'},{startupSignals:['SECRET']},{environment:{...detailed().update.environment,matlabVersion:'SECRET'}},
+    {pluginFailures:[{component:'QuickLab',reason:'startup',message:'SECRET'}]},
+    {pluginFailures:[{component:'Jane',reason:'startup'}]}])
+    assert.equal(validateReport({...detailed(),update:{...detailed().update,...change}},catalog),false);
+  assert.equal(validateReport({...detailed(),context:'runtime'},catalog),false);
+});
+test('Different update root causes get different issue fingerprints',async()=>{
+  const a=detailed(); assert.equal(await fingerprint(a),await fingerprint({...a,eventId:'c'.repeat(32)}));
+  assert.notEqual(await fingerprint(a),await fingerprint({...a,update:{...a.update,reason:'access-denied'}}));
+  assert.equal(await fingerprint(a),await fingerprint({...a,update:{...a.update,environment:{...a.update.environment,freeDiskMB:500}}}));
+});
+test('Detailed report reaches private issue with step, component, native codes and plugin checks',async()=>{
+  const sample=detailed(); sample.update.pluginFailures=[{component:'QuickLab',reason:'startup'}];
+  const {args,calls}=deliveryFixture({sample}); assert.equal(await collect(args),1);
+  const body=JSON.parse(calls.find(c=>c.url.endsWith('/issues')).options.body).body;
+  for(const expected of ['Target package: 1.2.1','Failed step: extract','Component: QuickLab','path-too-long','Windows HRESULT: -2147024690','Install-EEGLAB.ps1','Plugin check: QuickLab']) assert.ok(body.includes(expected));
 });

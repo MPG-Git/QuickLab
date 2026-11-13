@@ -8,9 +8,12 @@ const endpoint=process.env.REPORTING_ENDPOINT;
 const repo=process.env.GITHUB_REPOSITORY, githubToken=process.env.GITHUB_TOKEN;
 const catalog=JSON.parse(await readFile(new URL('./diagnostic-sources.json',import.meta.url),'utf8'));
 const source=Object.keys(catalog.sources).find(k=>catalog.sources[k]==='eeglab_desktop_start.m');
-const sample={schemaVersion:1,eventId:randomUUID().replaceAll('-',''),observedAt:new Date().toISOString(),
-  release:catalog.release,matlabRelease:'2023b',context:'validation',errorCode:22,
-  frames:[{sourceId:source.slice(1),line:100000+(Number(process.env.GITHUB_RUN_ID)%800000)}]};
+const sample={schemaVersion:2,eventId:randomUUID().replaceAll('-',''),observedAt:new Date().toISOString(),
+  release:catalog.release,matlabRelease:'2023b',context:'update',errorCode:21,
+  frames:[{sourceId:source.slice(1),line:100000+(Number(process.env.GITHUB_RUN_ID)%800000)}],
+  update:{targetVersion:catalog.release,stage:'extract',component:'QuickLab',reason:'path-too-long',
+    httpStatus:0,exitCode:1,systemCode:-2147024690,source:'Install-EEGLAB.ps1',line:60,pluginFailures:[],
+    matlabIdentifier:'',startupSignals:[],environment:{matlabVersion:'23.2.0.2515942',windowsVersion:'10.0.26100.0',powershellVersion:'5.1.26100.0',architecture:'x64',freeDiskMB:12345}}};
 const identityToken=await requestGitHubIdentity(endpoint,process.env);
 let issueNumber;
 const request=async(url,options)=>{
@@ -28,6 +31,8 @@ try {
   assert.equal((await fetch(endpoint+'/claim',{method:'POST'})).status,401);
   assert.equal((await fetch(endpoint+'/report',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({...sample,message:'SYNTHETIC_PRIVATE_SENTINEL'})})).status,400);
+  assert.equal((await fetch(endpoint+'/report',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({...sample,update:{...sample.update,rawLog:'SYNTHETIC_PRIVATE_SENTINEL'}})})).status,400);
   const send=async()=>assert.equal((await fetch(endpoint+'/report',{method:'POST',
     headers:{'Content-Type':'application/json'},body:JSON.stringify(sample)})).status,202);
   const args={endpoint,identityToken,repo,githubToken,catalog,request};
@@ -39,6 +44,7 @@ try {
   assert.ok(await collect(args)>=1); assert.equal(issueNumber,original);
   const issue=await github('GET','/issues/'+issueNumber);
   assert.match(issue.body,/Observations: 2/);
+  for(const expected of ['Failed step: extract','Component: QuickLab','path-too-long','Windows HRESULT: -2147024690','MATLAB build: 23.2.0.2515942']) assert.ok(issue.body.includes(expected));
   assert.ok(!issue.body.includes('SYNTHETIC_PRIVATE_SENTINEL'));
   await github('PATCH','/issues/'+issueNumber,{state:'closed',
     title:issue.title+' — SYNTHETIC LIVE TEST',
