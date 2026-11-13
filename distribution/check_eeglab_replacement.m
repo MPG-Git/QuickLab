@@ -22,6 +22,8 @@ report.startup = PLUGINLIST;
 report.startupFailures = [];
 report.mwfAvailable = ~isempty(which('mwf_process'));
 report.fieldtripRoot = which('ft_defaults');
+report.fieldtripInitializers = which('ft_defaults','-all');
+if ischar(report.fieldtripInitializers), report.fieldtripInitializers = {report.fieldtripInitializers}; end
 report.notRegistered = {};
 for k = 1:numel(manifest.plugins)
     if iscell(manifest.plugins), p = manifest.plugins{k};
@@ -44,4 +46,18 @@ assert(isempty(report.startupFailures),'Some plugins failed during startup.');
 assert(report.mwfAvailable,'The supplemental MWF dependency is not on the path.');
 assert(strcmpi(report.fieldtripRoot,fullfile(core,'plugins','Fieldtrip-lite250523','ft_defaults.m')), ...
     'FieldTrip is shadowed by another toolbox. Use the supplied launcher.');
+assert(numel(report.fieldtripInitializers)==1, ...
+    'Multiple FieldTrip startup functions are active. Use the supplied launcher.');
+% Catch absent/misparsed version metadata before an update becomes active.
+for k = 1:numel(manifest.plugins)
+    if iscell(manifest.plugins), p = manifest.plugins{k}; else, p = manifest.plugins(k); end
+    registered = PLUGINLIST(strcmp({PLUGINLIST.foldername},p.folder));
+    expected = p.version;
+    if strcmp(p.name,'Neurolode'), expected = '1.7.0'; end
+    assert(strcmp(registered.version,expected), ...
+        'EEGLAB:VersionMetadata','Incorrect registered version for %s.',p.name);
+end
+quicklab = PLUGINLIST(strcmp({PLUGINLIST.foldername},'QuickLabMPG1.0.0'));
+assert(strcmp(quicklab.plugin,'QuickLabMPG'), ...
+    'The lab QuickLab edition must have a distinct plugin catalog identity.');
 end

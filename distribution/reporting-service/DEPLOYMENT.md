@@ -1,4 +1,16 @@
-# Hosted deployment, 9 November 2026
+# Hosted deployment
+
+## Update, 13 November 2026
+
+Desktop 1.2.0 is supported by the function pinned to QuickLab commit
+`a066850ee77f18e6168d4b050ed6df7e9ae45a2f`. Its catalog retains 1.1.0.
+Private collector commit `bb87ecaeb3dddeb87edf36f48abdf90fd88ead34` and
+live workflow run `43515925434` passed, including intake, privacy rejection,
+OIDC authorization, deduplication, and grouped private issue delivery.
+Authentication, consent, database permissions and retention are unchanged.
+See [1.2.0 verification](../releases/1.2.0.md) for the exact tested assets.
+
+## Initial deployment, 9 November 2026
 
 The dedicated EEGLAB Support Supabase project serves
 `https://xuhumtlubgkqfcfrrwiv.supabase.co/functions/v1/eeglab-reports`.

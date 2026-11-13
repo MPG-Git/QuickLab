@@ -1,5 +1,34 @@
 # Validation of the EEGLAB replacement build
 
+## Desktop 1.2.0, 13 November 2026
+
+Windows, MATLAB R2023b Update 3. Reproduced the 1.1.0 warning: both
+FieldTrip-lite and Fileio provided an active `ft_defaults.m`. The new build
+has exactly one initializer and retains Fileio's data readers/writers.
+All 53 inventoried plugins plus EEG-BIDS registered. Every pinned version
+matched EEGLAB's registration; startup contained no unknown versions,
+folder/hook mismatches, false update offers, or FieldTrip path warning.
+QuickLabMPG registered once with the existing QuickLab menu.
+
+Passed: both installed synthetic examples; all 20 QuickLab regressions;
+actual REST Infinity/Average cross-check (30 channels, four epochs, RMS
+4.9011 microvolts; maximum REST disagreement 8.53e-14, maximum differential
+voltage residual 7.47e-14); synthetic SET import through FieldTrip; SPM
+26.10.01 synthetic NIfTI write/read and compiled Windows sampling.
+SPM's native M/EEG initializer was also inspected: it introduces a separate
+vendored FieldTrip, so that interface requires a separate clean MATLAB
+session. It is not a supported same-session EEGLAB workflow.
+
+The 16 updater checks, nine PowerShell reporting checks, 15 reporting-service
+tests, and MATLAB privacy/consent/history/export checks passed. The 1.2.0
+reporting catalog retains 1.1.0 compatibility. Repeat the release integration
+checks using `distribution/tests/validate_release.m` in a fresh MATLAB session;
+run the comparison suites from `tests` separately. These checks do not certify
+every third-party algorithm, GPU configuration, or lab workstation.
+
+Earlier release evidence follows; version choices and packaging details for
+1.2.0 are in [VERSION_AUDIT.md](VERSION_AUDIT.md).
+
 ## Desktop installer and updates, 9 November 2026
 
 The Windows desktop installer detects MATLAB and installs shortcuts without

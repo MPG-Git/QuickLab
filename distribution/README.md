@@ -15,7 +15,7 @@ from the installation; official publishers' sample/template data are retained.
 
 ## Install once, then use the desktop shortcut
 
-1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.1.0).
+1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.2.0).
 2. Double-click it, then click **Install and open EEGLAB**. MATLAB is detected automatically; choose its `matlab.exe` if detection fails.
 3. Wait for the downloads and practice checks. MATLAB windows may open briefly during validation. EEGLAB opens when the checks pass.
 
@@ -87,14 +87,22 @@ CUDAICA requires a supported NVIDIA GPU and compatible CUDA/Intel runtime
 libraries. Its upstream GUI replacement files stop at older EEGLAB versions;
 this installer preserves the 2026 core instead of overwriting `pop_runica`.
 The `cudaica` command is installed, but GPU execution and its ICA menu
-integration have not been validated. SPM12 r7771 is selected because the old log gives no SPM version.
+integration have not been validated. SPM is updated to the official stable
+26.10.01 MATLAB distribution, including its Windows binaries. Its NIfTI
+read/write and sampling APIs were tested. SPM's native M/EEG interface adds
+its own bundled FieldTrip: use that interface in a separate clean MATLAB
+session, not inside this EEGLAB session. Full SPM M/EEG workflows are unverified.
 QuickLab uses the tested MPG-Git custom version; additional local menu edits on
 another computer cannot be reconstructed from a startup log alone.
-Some old hooks report `?` or differently formatted versions despite the pinned
-package version. EEGLAB also offers catalog QuickLab 0.91 as an update to the
-custom hook's 0.1. Do not replace this custom QuickLab using that offer: use
-MPG-Git updates to retain the comparison fix. The manifest is the package
-version record for this build.
+Desktop 1.2.0 corrects missing version labels using versioned plugin folders
+and normalizes EYE-EEG's hook version spelling. Our maintained edition is
+registered as **QuickLabMPG 1.0.0**, with the usual **QuickLab** menu, so it is
+not mistaken for the historical QuickLab 0.91 catalog plugin.
+Fileio's redundant standalone startup function is omitted; its readers and
+writers remain installed, using FieldTrip-lite's initializer. FieldTrip's
+path warnings remain enabled. The manifest records every pinned package.
+The official stable EEGLAB release and extension catalog were checked on
+13 November 2026; see [version audit](VERSION_AUDIT.md).
 
 MATLAB Signal Processing and Statistics and Machine Learning toolboxes are
 required by workflows such as RELAX. Other selected methods can require more

@@ -21,7 +21,7 @@ duplicates, and includes the QuickLab/NeuroLode synthetic examples. See its
    `main` in your existing checkout.
 2. Close EEGLAB. Back up your current QuickLab plugin folder.
 3. For a new installation, copy `QuickLab_11.12.21_NL` into EEGLAB's `plugins`
-   folder. Keep only one active QuickLab installation on the MATLAB path.
+   folder and rename it `QuickLabMPG1.0.0`. Keep only one active QuickLab installation on the MATLAB path. This identifies the maintained lab edition separately from the historical catalog plugin.
 4. For a customized **QuickLab GUNN** installation, copy just the updated
    `plotDifference.m` into its existing plugin folder. This preserves your
    customized menu and fixes callbacks that call `plotDifference(ALLEEG)`.
