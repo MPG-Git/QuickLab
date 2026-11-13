@@ -1,5 +1,16 @@
 # Hosted deployment
 
+## Detailed update reports, 13 November 2026
+
+The live function now imports QuickLab commit
+`423e614570974b29d112a08087e29610fd1f9586`, supporting desktop 1.2.1 and
+schema 2 structured update details. Schema 1 reports and the 1.1.0/1.2.0
+catalogs remain supported. Private collector commit
+`ae30b8ffd437efb56208dc62689894d198610c61` passed live run `43519414884`.
+The installed Windows sender also passed real intake/private delivery as
+synthetic issue #12. No database migration, credential, access or consent
+change was needed. Raw log and exception-message text remains excluded.
+
 ## Update, 13 November 2026
 
 Desktop 1.2.0 is supported by the function pinned to QuickLab commit

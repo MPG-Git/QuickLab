@@ -1,4 +1,10 @@
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'Update-Diagnostics.ps1')
+function Read-ReportingCatalog([string]$VersionRoot) {
+    $file=Join-Path $PSScriptRoot 'diagnostic-sources.json'
+    if (-not (Test-Path -LiteralPath $file)) { $file=Join-Path $VersionRoot 'diagnostic-sources.json' }
+    return Get-Content -Raw -LiteralPath $file | ConvertFrom-Json
+}
 
 function Test-ReportingConsent([string]$HomeRoot) {
     try {
@@ -13,9 +19,11 @@ function Test-TechnicalReport($Report,$Catalog) {
             if (-not $Catalog) { return $false }
         }
         $expected=@('context','errorCode','eventId','frames','matlabRelease','observedAt','release','schemaVersion')
+        if ($Report.schemaVersion -eq 2) { $expected+=@('update'); $expected=@($expected | Sort-Object) }
         if (@(Compare-Object @($Report.PSObject.Properties.Name | Sort-Object) $expected).Count) { return $false }
-        if ($Report.schemaVersion -ne 1 -or $Report.release -cne $Catalog.release) { return $false }
-        if ($Report.eventId -cnotmatch '^[a-f0-9]{32}$' -or $Report.observedAt -cnotmatch '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$' -or $Report.matlabRelease -cnotmatch '^\d{4}[ab]$') { return $false }
+        if ($Report.schemaVersion -notin @(1,2) -or $Report.release -cne $Catalog.release) { return $false }
+        if ($Report.eventId -cnotmatch '^[a-f0-9]{32}$' -or $Report.observedAt -cnotmatch '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$' -or ($Report.matlabRelease -cnotmatch '^\d{4}[ab]$' -and -not ($Report.schemaVersion -eq 2 -and $Report.matlabRelease -ceq 'unknown'))) { return $false }
+        if ($Report.schemaVersion -eq 2 -and ($Report.context -cnotin @('update','validation') -or -not (Test-UpdateDetail $Report.update $Catalog))) { return $false }
         if ($Report.context -cnotin @('startup','practice','runtime','update','validation')) { return $false }
         if ($Report.errorCode -isnot [ValueType] -or $Report.errorCode -lt 0 -or $Report.errorCode -gt 22 -or $Report.errorCode -ne [math]::Floor($Report.errorCode)) { return $false }
         if ($Report.frames -isnot [Array] -or $Report.frames.Count -gt 8) { return $false }
@@ -27,13 +35,20 @@ function Test-TechnicalReport($Report,$Catalog) {
         return $true
     } catch { return $false }
 }
-function Write-DesktopDiagnostic([string]$HomeRoot,[string]$VersionRoot,[string]$Context,[int]$Code) {
+function Write-DesktopDiagnostic([string]$HomeRoot,[string]$VersionRoot,[string]$Context,[int]$Code,$Detail=$null,[switch]$PassThru) {
     try {
         if ($Context -cnotin @('update','validation') -or $Code -notin @(20,21,22)) { return }
-        $catalog=Get-Content -Raw -LiteralPath (Join-Path $VersionRoot 'diagnostic-sources.json') | ConvertFrom-Json
-        $validation=Get-Content -Raw -LiteralPath (Join-Path $VersionRoot 'desktop_validation.json') | ConvertFrom-Json
-        $matlabRelease=''; if ($validation.matlab -match '\(R(\d{4}[ab])\)') { $matlabRelease=$Matches[1] }
-        $r=[pscustomobject]@{schemaVersion=1;eventId=[guid]::NewGuid().ToString('N');observedAt=[DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ');release=$catalog.release;matlabRelease=$matlabRelease;context=$Context;errorCode=$Code;frames=@()}
+        $catalog=Read-ReportingCatalog $VersionRoot
+        $release=(Get-Content -Raw -LiteralPath (Join-Path $VersionRoot 'diagnostic-sources.json') | ConvertFrom-Json).release
+        $validation=$null
+        try { $validation=Get-Content -Raw -LiteralPath (Join-Path $VersionRoot 'desktop_validation.json') | ConvertFrom-Json } catch { }
+        $matlabRelease='unknown'; if ($validation.matlab -match '\(R(\d{4}[ab])\b') { $matlabRelease=$Matches[1] }
+        $r=[pscustomobject]@{schemaVersion=1;eventId=[guid]::NewGuid().ToString('N');observedAt=[DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ');release=$release;matlabRelease=$matlabRelease;context=$Context;errorCode=$Code;frames=@()}
+        if ($Detail) {
+            if ($validation.matlab -match '^(\d+(\.\d+){1,4})') { $Detail.environment.matlabVersion=$Matches[1] }
+            try { $drive=New-Object IO.DriveInfo([IO.Path]::GetPathRoot($VersionRoot)); $Detail.environment.freeDiskMB=[math]::Floor($drive.AvailableFreeSpace/1MB) } catch { }
+            $r.schemaVersion=2; $r | Add-Member -NotePropertyName update -NotePropertyValue $Detail
+        }
         if (-not (Test-TechnicalReport $r $catalog)) { return }
         $targets=@('history'); if (Test-ReportingConsent $HomeRoot) { $targets+='queue' }
         foreach ($target in $targets) {
@@ -43,9 +58,10 @@ function Write-DesktopDiagnostic([string]$HomeRoot,[string]$VersionRoot,[string]
                 if ($i -lt $files.Count-99 -or $files[$i].LastWriteTimeUtc -lt [DateTime]::UtcNow.AddDays(-30)) { Remove-Item -LiteralPath $files[$i].FullName }
             }
             $file=Join-Path $folder ('report-'+$r.eventId+'.json'); $tmp=$file+'.tmp'
-            [IO.File]::WriteAllText($tmp,($r | ConvertTo-Json -Depth 5),(New-Object Text.UTF8Encoding($false)))
+            [IO.File]::WriteAllText($tmp,($r | ConvertTo-Json -Depth 8 -Compress),(New-Object Text.UTF8Encoding($false)))
             [IO.File]::Move($tmp,$file)
         }
+        if ($PassThru) { return $r.eventId }
     } catch { } # Never interrupt startup or the updater.
 }
 function Send-TechnicalReportBatch([string]$HomeRoot,[string]$VersionRoot) {
@@ -62,7 +78,7 @@ function Send-TechnicalReportBatchUnlocked([string]$HomeRoot,[string]$VersionRoo
     $config=Get-Content -Raw -LiteralPath (Join-Path $VersionRoot 'setup\desktop\reporting.json') | ConvertFrom-Json
     # Only the release-pinned Supabase endpoint is eligible. Redirects are forbidden.
     if ($config.endpoint -cnotmatch '^https://[a-z0-9]{20}\.supabase\.co/functions/v1/eeglab-reports/report$' -or $config.privacyVersion -ne 1) { return $sent }
-    $catalog=Get-Content -Raw -LiteralPath (Join-Path $VersionRoot 'diagnostic-sources.json') | ConvertFrom-Json
+    $catalog=Read-ReportingCatalog $VersionRoot
     $queue=Join-Path $HomeRoot 'reporting\queue'
     if (-not (Test-Path -LiteralPath $queue)) { return $sent }
     foreach ($file in @(Get-ChildItem -LiteralPath $queue -Filter 'report-*.json' -File | Sort-Object LastWriteTimeUtc | Select-Object -First 10)) {

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { validateReport, codeNames, catalogFor } from './service.mjs';
+import { validateReport, codeNames, catalogFor, updateSummary } from './service.mjs';
 import { requestGitHubIdentity } from './github-identity.mjs';
 
 export async function collect({endpoint,identityToken,repo,githubToken,catalog,request=fetch}) {
@@ -44,7 +44,7 @@ export async function collect({endpoint,identityToken,repo,githubToken,catalog,r
     const body='Automatically collected technical diagnostics. No raw log, exception message, recording or personal path is included.\n\n'+
       '- Package: '+r.release+'\n- MATLAB: R'+r.matlabRelease+'\n- Context: '+r.context+'\n- Error: '+codeNames[r.errorCode]+
       '\n- Observations: '+group.count+'\n- First received: '+new Date(group.firstSeen).toISOString()+
-      '\n- Last received: '+new Date(group.lastSeen).toISOString()+'\n\nCode locations:\n'+lines+
+      '\n- Last received: '+new Date(group.lastSeen).toISOString()+'\n\nCode locations:\n'+lines+(r.schemaVersion===2?updateSummary(r.update):'')+
       '\n\nCounts are observations, not every occurrence. Repeated identical errors may be observed only once per session. A plugin may have handled the error; a report does not by itself prove the analysis failed.';
     await checkPrivate();
     if(number) {

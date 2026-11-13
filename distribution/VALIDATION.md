@@ -1,5 +1,30 @@
 # Validation of the EEGLAB replacement build
 
+## Desktop 1.2.1, 13 November 2026
+
+On Windows PowerShell 5.1 and MATLAB R2023b Update 3: 18 reporting checks,
+16 update checks, an actual failed updater worker, MATLAB privacy/export tests,
+and failed MATLAB-candidate tests passed. The candidate tests preserve the
+underlying plugin-hook exception when EEGLAB catches it internally. Tests
+verify access-denied/path-length causes, licensing-message recognition,
+opt-out, offline retry, and exclusion of private sentinel text and paths.
+All 18 Node/PostgreSQL/OIDC tests passed.
+
+The original 1.1.0 client installed 1.2.1 into a new directory, checked all 53
+plugins plus bundled EEG-BIDS, ran both synthetic examples, activated the new
+version, and rolled back successfully without modifying the previous install.
+The exact installed PowerShell sender delivered a synthetic detailed error
+to Supabase without MATLAB running; private issue #12 preserved its cause and
+environment. Live workflow 43519414884 passed intake, nested-field rejection,
+authentication, deduplication and private delivery (synthetic issue #13).
+Both synthetic issues were identified and closed. No personal logs or
+recordings were uploaded. Plugin versions and algorithms are unchanged from
+1.2.0; that release's scientific verification and limitations still apply.
+
+This release improves diagnostics; it does not establish the root cause of
+the lab's earlier generic 1.1.0 update failure or guarantee every unfamiliar
+failure can be resolved from an automatic report alone.
+
 ## Desktop 1.2.0, 13 November 2026
 
 Windows, MATLAB R2023b Update 3. Reproduced the 1.1.0 warning: both

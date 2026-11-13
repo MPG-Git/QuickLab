@@ -7,12 +7,14 @@ powershell -File .\Install-EEGLAB.ps1 -Destination C:\EEGLAB_2026_New
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)][string]$Destination,
-    [string]$Cache = (Join-Path $env:LOCALAPPDATA 'EEGLAB-download-cache')
+    [string]$Cache = (Join-Path $env:LOCALAPPDATA 'EEGLAB-download-cache'),
+    $Diagnostic=$null
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+. (Join-Path $PSScriptRoot 'desktop\Update-Diagnostics.ps1')
 $manifestPath = Join-Path $PSScriptRoot 'manifest.json'
 $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
 $target = [IO.Path]::GetFullPath($Destination)
@@ -24,6 +26,7 @@ New-Item -ItemType Directory -Path $Cache -Force | Out-Null
 $Cache = [IO.Path]::GetFullPath($Cache)
 
 function Get-VerifiedArchive($item, [string]$cacheName) {
+    Set-UpdateStage $Diagnostic 'download' $item.name
     $legacyPath = Join-Path $Cache $cacheName
     if ((Test-Path -LiteralPath $legacyPath) -and (Get-FileHash -LiteralPath $legacyPath -Algorithm SHA256).Hash -eq $item.sha256) { return $legacyPath }
     $zipPath = Join-Path $Cache ($item.name + '-' + $item.sha256 + '.zip')
@@ -31,16 +34,19 @@ function Get-VerifiedArchive($item, [string]$cacheName) {
         Write-Host "Downloading $($item.name) $($item.version)..."
         $partial = $zipPath + '.' + [guid]::NewGuid().ToString('N') + '.partial'
         Invoke-WebRequest -UseBasicParsing -Uri $item.url -OutFile $partial -TimeoutSec 180
-        if ((Get-FileHash -LiteralPath $partial -Algorithm SHA256).Hash -ne $item.sha256) { throw "Checksum mismatch for $($item.name). The current installation has not been changed." }
+        Set-UpdateStage $Diagnostic 'integrity' $item.name
+        if ((Get-FileHash -LiteralPath $partial -Algorithm SHA256).Hash -ne $item.sha256) { if ($Diagnostic) { $Diagnostic.reason='hash-mismatch' }; throw "Checksum mismatch for $($item.name). The current installation has not been changed." }
         Move-Item -LiteralPath $partial -Destination $zipPath
     }
     if ((Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash -ne $item.sha256) {
+        if ($Diagnostic) { $Diagnostic.stage='integrity'; $Diagnostic.reason='hash-mismatch' }
         throw "Checksum mismatch: $zipPath. The upstream archive may have changed; do not use this incomplete installation."
     }
     return $zipPath
 }
 
 function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$destination, [switch]$Core, [switch]$SyntheticOnly, [switch]$FileioWithFieldTrip) {
+    if ($Diagnostic) { $Diagnostic.stage='extract'; $Diagnostic.reason='unknown' }
     $fullDestination = [IO.Path]::GetFullPath($destination)
     $boundary = $fullDestination.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     [IO.Directory]::CreateDirectory($fullDestination) | Out-Null
@@ -63,6 +69,7 @@ function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$dest
             if ($FileioWithFieldTrip -and $relative -eq 'ft_defaults.m') { continue }
             $path = [IO.Path]::GetFullPath((Join-Path $fullDestination $relative))
             if (-not $path.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) {
+                if ($Diagnostic) { $Diagnostic.reason='archive-invalid' }
                 throw "Archive entry escapes its destination: $name"
             }
             [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($path)) | Out-Null
@@ -70,7 +77,7 @@ function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$dest
             $count++
         }
     } finally { $zip.Dispose() }
-    if ($count -eq 0) { throw "No files extracted from $zipPath with prefix $prefix" }
+    if ($count -eq 0) { if ($Diagnostic) { $Diagnostic.reason='source-missing' }; throw "No files extracted from $zipPath with prefix $prefix" }
     return $count
 }
 

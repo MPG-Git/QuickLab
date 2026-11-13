@@ -14,7 +14,11 @@ try {
     }
     $update = $null
     try { $update = Get-DesktopUpdate $state } catch {
-        if (Get-Command Write-DesktopDiagnostic -ErrorAction SilentlyContinue) { Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 20 }
+        if (Get-Command Write-DesktopDiagnostic -ErrorAction SilentlyContinue) {
+            $detail=New-UpdateDetail; Set-UpdateStage $detail 'check'; $detail=Get-UpdateFailureDetail $_ $detail
+            Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 20 $detail
+            Start-UpdateReportSender $HomeRoot $state.current.path
+        }
         [IO.File]::AppendAllText((Join-Path $HomeRoot 'update-check.log'),[DateTime]::UtcNow.ToString('o') + ' Update check unavailable.' + [Environment]::NewLine)
     }
     $deferred = $update -and $state.deferredVersion -eq $update.version -and $state.deferredUntilUtc -and [DateTime]::Parse($state.deferredUntilUtc).ToUniversalTime() -gt [DateTime]::UtcNow
@@ -38,9 +42,22 @@ try {
                 if ($worker.ExitCode -ne 0) { throw ('Update validation failed. Details: ' + $job + '.error.log') }
                 $state = Read-DesktopState $HomeRoot
             } catch {
-                if (Get-Command Write-DesktopDiagnostic -ErrorAction SilentlyContinue) { Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 21 }
+                # The worker queues the detailed failure before it exits. If it
+                # could not start or died before capture, record a fallback.
+                $recorded=$descriptor -and (Test-Path -LiteralPath ($descriptor+'.reported'))
+                if (-not $recorded -and (Get-Command Write-DesktopDiagnostic -ErrorAction SilentlyContinue)) {
+                    $detail=Get-UpdateFailureDetail $_ (New-UpdateDetail $update.version)
+                    if ($worker -and $worker.HasExited) { $detail.exitCode=[int]$worker.ExitCode }
+                    $recorded=Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 21 $detail -PassThru
+                    Start-UpdateReportSender $HomeRoot $state.current.path
+                }
                 [IO.File]::AppendAllText((Join-Path $HomeRoot 'update-check.log'),[DateTime]::UtcNow.ToString('o') + ' ' + $_.Exception.Message + [Environment]::NewLine)
-                [Windows.Forms.MessageBox]::Show("The update could not finish. Your previous version will open.`n`nPlease send Matt a picture of this message:`n" + $_.Exception.Message,'EEGLAB update needs help') | Out-Null
+                $reportMessage='Automatic reporting is off. You can turn it on in Error reporting settings.'
+                if (Test-ReportingConsent $HomeRoot) {
+                    $reportMessage='Technical update details will be sent automatically. If offline, reporting will retry when you next open EEGLAB.'
+                    if (-not $recorded) { $reportMessage='The automatic report could not be saved. Please tell Matt the update failed.' }
+                }
+                [Windows.Forms.MessageBox]::Show("The update could not finish. Your previous version will open.`n`n"+$reportMessage,'EEGLAB update needs help') | Out-Null
                 $state = Read-DesktopState $HomeRoot
             } finally { $progress.Close(); $progress.Dispose() }
         } else {
