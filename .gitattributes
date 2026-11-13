@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+QuickLab_11.12.21_NL/examples/synthetic/expected/ica_metrics.csv text eol=lf

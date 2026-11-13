@@ -6,5 +6,5 @@
   "expected/metrics.csv": "de1caec06e5081862c9574fcd680761cb1a8f7bf72e00f8172b3b4cb8ad8f351",
   "expected/rms_by_channel.png": "87c62a150492cc3236857f67b2d15d9c7b675abf71670941e4fe0245f4a00e86",
   "data/synthetic_rank3.set": "43c2b58b1fc7656e4d399aec99900300de5ddaec6d1e5581458d5c7ccdc70841",
-  "expected/ica_metrics.csv": "e55a0b6ee0288b13fe8da213288f76b7c173b915536c86e97a898f9898f99864"
+  "expected/ica_metrics.csv": "202746eee09e983ff9d834fdb68d14749d77cf57a37430dd4c9064167b1dad7c"
 }
