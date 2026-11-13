@@ -27,7 +27,7 @@ spm_write_vol(vol,known); loaded=spm_vol(vol.fname);
 assert(isequal(spm_read_vols(loaded),double(known)));
 assert(spm_sample_vol(loaded,2,3,4,0)==double(known(2,3,4)));
 % Every Fileio reader is retained; exercise reading an actual synthetic set.
-file=fullfile(root,'eeglab2026.1.0','plugins','QuickLabMPG1.0.0', ...
+file=fullfile(root,'eeglab2026.1.0','plugins','QuickLabMPG1.1.0', ...
  'examples','synthetic','data','synthetic_average.set');
 header=ft_read_header(file); data=ft_read_data(file);
 assert(header.nChans==3 && size(data,1)==3 && all(isfinite(data(:))));

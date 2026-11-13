@@ -10,7 +10,7 @@ try
     stage='validation'; report=check_eeglab_replacement;
     stage='practice'; output=tempname(root); run_replacement_examples(output);
     result=struct('status','PASS','eeglab',eeg_getversion,'matlab',version, ...
-        'plugins',numel(report.plugins),'syntheticExamples','QuickLab and NeuroLode','outputFolder',output);
+        'plugins',numel(report.plugins),'syntheticExamples','QuickLab comparison, ICA and NeuroLode','outputFolder',output);
     fid=fopen(fullfile(root,'desktop_validation.json'),'w');
     assert(fid>=0,'Cannot save the validation result.');
     cleanup=onCleanup(@() fclose(fid)); %#ok<NASGU>

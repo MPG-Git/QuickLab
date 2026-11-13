@@ -45,7 +45,7 @@ function Get-VerifiedArchive($item, [string]$cacheName) {
     return $zipPath
 }
 
-function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$destination, [switch]$Core, [switch]$SyntheticOnly, [switch]$FileioWithFieldTrip) {
+function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$destination, [switch]$Core, [switch]$SyntheticOnly, [switch]$FileioWithFieldTrip, [switch]$Binica) {
     if ($Diagnostic) { $Diagnostic.stage='extract'; $Diagnostic.reason='unknown' }
     $fullDestination = [IO.Path]::GetFullPath($destination)
     $boundary = $fullDestination.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
@@ -67,6 +67,9 @@ function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$dest
             # This bundle always supplies the full FieldTrip-lite initializer.
             # Keep every Fileio reader/writer; do not disable FieldTrip warnings.
             if ($FileioWithFieldTrip -and $relative -eq 'ft_defaults.m') { continue }
+            # Keep the Windows runtime, corresponding source/build files and
+            # license. Do not distribute upstream example EEG recordings.
+            if ($Binica -and $relative -notmatch '^(ica_windows\.exe|libopenblas\.dll|License\.txt|README\.md|readme\.txt|Makefile[^/]*|src/.*|include/.*)$') { continue }
             $path = [IO.Path]::GetFullPath((Join-Path $fullDestination $relative))
             if (-not $path.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) {
                 if ($Diagnostic) { $Diagnostic.reason='archive-invalid' }
@@ -85,6 +88,12 @@ function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$dest
 $core = Join-Path $target 'eeglab2026.1.0'
 $archive = Get-VerifiedArchive $manifest.base 'eeglab2026.1.0.zip'
 $null = Expand-SelectedArchive $archive $manifest.base.archive_root $core -Core
+# Keep the rank disagreement visible but remove the incorrect OS diagnosis.
+$icaFile = Join-Path $core 'functions\popfunc\pop_runica.m'
+$icaText = [IO.File]::ReadAllText($icaFile)
+$rankMessage = 'Warning: fixing rank computation inconsistency (%d vs %d) most likely because running under Linux 64-bit Matlab, taking the minimum'
+if ($icaText.Split(@($rankMessage),[StringSplitOptions]::None).Length -ne 2) { throw 'Review upstream ICA rank message before updating this patch.' }
+[IO.File]::WriteAllText($icaFile,$icaText.Replace($rankMessage,'Note: data rank estimates differ (%d vs %d); EEGLAB uses the smaller estimate.'),(New-Object Text.UTF8Encoding($false)))
 $installed = @()
 foreach ($plugin in $manifest.plugins) {
     $archive = Get-VerifiedArchive $plugin ($plugin.name + '.zip')
@@ -106,7 +115,7 @@ foreach ($plugin in $manifest.plugins) {
 foreach ($dependency in $manifest.dependencies) {
     $archive = Get-VerifiedArchive $dependency ($dependency.name + '.zip')
     $folder = Join-Path (Join-Path $target 'dependencies') $dependency.folder
-    $null = Expand-SelectedArchive $archive $dependency.archive_root $folder
+    $null = Expand-SelectedArchive $archive $dependency.archive_root $folder -Binica:($dependency.name -eq 'BINICA')
     Write-Host "Installed supplemental dependency $($dependency.name)"
 }
 Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $target 'manifest.json')

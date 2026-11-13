@@ -17,4 +17,5 @@ cd(root);
 addpath(fullfile(core,'plugins','Fieldtrip-lite250523'),'-begin');
 ft_defaults;
 addpath(genpath(fullfile(root,'dependencies','MWF')));
+addpath(fullfile(root,'dependencies','BINICA'));
 end

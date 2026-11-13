@@ -15,7 +15,7 @@ from the installation; official publishers' sample/template data are retained.
 
 ## Install once, then use the desktop shortcut
 
-1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.2.1).
+1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.3.0).
 2. Double-click it, then click **Install and open EEGLAB**. MATLAB is detected automatically; choose its `matlab.exe` if detection fails.
 3. Wait for the downloads and practice checks. MATLAB windows may open briefly during validation. EEGLAB opens when the checks pass.
 

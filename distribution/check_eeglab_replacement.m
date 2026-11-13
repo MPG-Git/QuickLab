@@ -21,6 +21,9 @@ global PLUGINLIST;
 report.startup = PLUGINLIST;
 report.startupFailures = [];
 report.mwfAvailable = ~isempty(which('mwf_process'));
+report.quicklab = quicklab_dependency_report(findall(groot,'Tag','EEGLAB'),false);
+assert(isempty(report.quicklab.missingFunctions),'QuickLab menu dependencies are missing.');
+assert(report.quicklab.binicaAvailable,'The bundled Windows BINICA executable is missing.');
 report.fieldtripRoot = which('ft_defaults');
 report.fieldtripInitializers = which('ft_defaults','-all');
 if ischar(report.fieldtripInitializers), report.fieldtripInitializers = {report.fieldtripInitializers}; end
@@ -57,7 +60,7 @@ for k = 1:numel(manifest.plugins)
     assert(strcmp(registered.version,expected), ...
         'EEGLAB:VersionMetadata','Incorrect registered version for %s.',p.name);
 end
-quicklab = PLUGINLIST(strcmp({PLUGINLIST.foldername},'QuickLabMPG1.0.0'));
+quicklab = PLUGINLIST(strcmp({PLUGINLIST.foldername},'QuickLabMPG1.1.0'));
 assert(strcmp(quicklab.plugin,'QuickLabMPG'), ...
     'The lab QuickLab edition must have a distinct plugin catalog identity.');
 end

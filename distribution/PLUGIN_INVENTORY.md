@@ -46,7 +46,7 @@ All 53 unique names from the supplied startup log are represented. Duplicate Qui
 | PICARD | unspecified | [2.0](https://sccn.ucsd.edu/eeglab/plugins/PICARD2.0.zip) |
 | postAmicaUtility | 2.1 | [2.1](https://sccn.ucsd.edu/eeglab/plugins/postAmicaUtility2.1.zip) |
 | PrepPipeline | 0.56.0 | [0.57.0](https://sccn.ucsd.edu/eeglab/plugins/PrepPipeline0.57.0.zip) |
-| QuickLab | 0.91 plus custom unversioned copy | [1.0.0](https://codeload.github.com/MPG-Git/QuickLab/zip/cdd8b5b077d9dd9a6fb0ca6cb38ce308a8f2b74e) |
+| QuickLab lab edition | 0.91 plus custom copy | [1.1.0](https://codeload.github.com/MPG-Git/QuickLab/zip/acc856281a15865e587987641c54aa82d2ac68ec) |
 | RELAX | 2.0.1 | [2.0.1](https://sccn.ucsd.edu/eeglab/plugins/RELAX2.0.1.zip) |
 | REST | 1.2 | [1.2](https://sccn.ucsd.edu/eeglab/plugins/REST1.2.zip) |
 | REST_fieldtrip | 1.0 | [1.0](https://sccn.ucsd.edu/eeglab/plugins/REST_fieldtrip1.0.zip) |
@@ -57,3 +57,5 @@ All 53 unique names from the supplied startup log are represented. Duplicate Qui
 | TESA | 1.1.1 | [1.1.1](https://sccn.ucsd.edu/eeglab/plugins/TESA-1.1.1.zip) |
 | trimOutlier | 2.0 | [2.0](https://sccn.ucsd.edu/eeglab/plugins/trimOutlier2.0.zip) |
 | Viewprops | 1.5.4 | [1.5.4](https://sccn.ucsd.edu/eeglab/plugins/Viewprops1.5.4.zip) |
+
+Desktop 1.3.0 additionally includes the official Windows BINICA executable, OpenBLAS runtime, source and license (SCCN commit `ec0004fd64213ca51290eff38636237e706b38b5`). Its upstream example recordings are excluded.
