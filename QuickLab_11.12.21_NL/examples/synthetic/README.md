@@ -77,3 +77,17 @@ generators refuse to overwrite an existing destination.
 These examples check the illustrated installation and workflow, not every menu
 item or scientific validity for a particular study. Reference plots may render
 differently with another operating system or graphics version.
+# ICA and folder practice
+
+`data/synthetic_rank3.set` is an additional, wholly synthetic four-channel
+Average-referenced dataset with known rank three. Load it using the bottom
+**Load Folder** button, choose **QuickLab > Quick PCA > ICA**, and expect three
+components. Use **Save (+)** with a new filename suffix to save a copy.
+
+The desktop **Practice data** button also runs `run_ica_demo`, producing
+synthetic input/output datasets and `ica_metrics.csv`. Compare the component
+count and rank with `expected/ica_metrics.csv`; the reconstruction error must
+be below `1e-5`. Exact ICA weights, signs and component order need not match.
+The Windows desktop bundle includes BINICA; an ordinary standalone plugin
+installation can run the MATLAB `runica` example without that executable.
+

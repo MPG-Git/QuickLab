@@ -8,18 +8,23 @@ For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distri
 The desktop installer finds MATLAB, creates shortcuts, and checks GitHub for
 tested updates. Updates are validated before activation, with a previous-version
 shortcut for rollback.
-Desktop version **1.2.1** adds automatic update-failure details: failed step,
-component, native codes, software environment, plugin validation failures and
-safe code locations. With reporting enabled, sending starts before the error
-dialog and does not require MATLAB to open. It retains the 1.2.0 fixes for the FieldTrip startup warning and misleading
-plugin update labels, identifies our maintained edition as QuickLabMPG 1.0.0,
-and updates SPM to 26.10.01. Existing users can close MATLAB, open the
-**EEGLAB 2026** shortcut, and click **Yes**. It also provides **Get error report**
-and optional private technical reporting. Lab members need no GitHub or Supabase account. See the
-[reporting details and limits](distribution/desktop/REPORTING.md).
-It downloads all 53 plugins from the supplied startup inventory, consolidates
-duplicates, and includes the QuickLab/NeuroLode synthetic examples. See its
-[inventory](distribution/PLUGIN_INVENTORY.md) and [validation limits](distribution/VALIDATION.md).
+Desktop version **1.3.0** restores **Save (+)**, filename additions, **Load Folder**,
+Previous/Next and the file selector. It includes Windows **BINICA** and its
+runtime library, handles rank-reduced ICA/PCA, fixes the high-pass menu, and
+keeps component graphics on the MATLAB client. Our lab edition is registered
+as **QuickLabMPG 1.1.0**. See the [workflow guide](QuickLab_11.12.21_NL/WORKFLOWS.md).
+
+Existing users can close MATLAB, open **EEGLAB 2026**, and click **Yes**.
+**Practice data** runs the comparison, ICA and NeuroLode examples, with
+synthetic datasets and numeric reference outputs included. All 53 inventoried
+plugins and bundled EEG-BIDS remain included.
+
+The update retains the FieldTrip startup and plugin-version-label fixes and
+optional private technical reporting, including automatic update-failure
+details. Lab members need no GitHub or Supabase account. See the
+[reporting details](distribution/desktop/REPORTING.md),
+[inventory](distribution/PLUGIN_INVENTORY.md) and
+[validation limits](distribution/VALIDATION.md).
 
 ## Install or update
 
@@ -27,7 +32,7 @@ duplicates, and includes the QuickLab/NeuroLode synthetic examples. See its
    `main` in your existing checkout.
 2. Close EEGLAB. Back up your current QuickLab plugin folder.
 3. For a new installation, copy `QuickLab_11.12.21_NL` into EEGLAB's `plugins`
-   folder and rename it `QuickLabMPG1.0.0`. Keep only one active QuickLab installation on the MATLAB path. This identifies the maintained lab edition separately from the historical catalog plugin.
+   folder and rename it `QuickLabMPG1.1.0`. Keep only one active QuickLab installation on the MATLAB path. This identifies the maintained lab edition separately from the historical catalog plugin.
 4. For a customized **QuickLab GUNN** installation, copy just the updated
    `plotDifference.m` into its existing plugin folder. This preserves your
    customized menu and fixes callbacks that call `plotDifference(ALLEEG)`.

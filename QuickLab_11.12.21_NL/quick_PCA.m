@@ -1,69 +1,53 @@
-function [EEG,com] = quick_PCA(EEG,IC,type,disp)
-% [EEG,com] = quick_PCA(EEG,IC,type) 
-%
-% Author: Ugo Bruzadin Nunes
-%
-% Copyright (C) 2021 Ugo Bruzadin Nunes
-% This program is free software; you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation; either version 2 of the License, or
-% (at your option) any later version.
-%
-% This program is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-% You should have received a copy of the GNU General Public License
-% along with this program; if not, write to the Free Software
-
+function [EEG,com] = quick_PCA(EEG,IC,type,showPlots)
+% QUICK_PCA Extended Infomax ICA, optionally reduced to IC dimensions.
+% Uses bundled Windows BINICA when available; otherwise EEGLAB MATLAB runica.
+% IC may be empty (estimated rank), a positive integer, or 'n-1'. Marked
+% components are not silently removed: reject them explicitly before rerunning.
 QuickLabDefs;
-
+% Original QuickLab: Copyright (C) 2021 Ugo Bruzadin Nunes, GPL-2.0-or-later.
 com = '';
+if nargin < 2, IC = []; end
+if nargin < 3 || isempty(type), type = ICATYPE; end
+if nargin < 4 || isempty(showPlots), showPlots = true; end
+if strcmpi(type,'auto')
+    if ispc && ~isempty(which('ica_windows.exe')), type='binica';
+    else, type='runica'; end
+end
 if isempty(EEG.data)
-    [EEG,com] = pop_loadset();
-    EEG = eegh(com, EEG);
-    eeglab redraw
+    error('QuickLab:NoData','Load a dataset before running ICA/PCA.');
 end
-
-if nargin < 3 || isempty(type)
-    type = ICATYPE;
+[dataRank,info] = quicklab_data_rank(EEG.data);
+if dataRank < 2
+    error('QuickLab:InsufficientRank','ICA needs at least two independent signals (estimated rank: %d).',dataRank);
 end
-
-if nargin < 4 || isempty(disp)
-    disp = 1;
-end
-mybadcomps = [];
-try mybadcomps = find(EEG.reject.gcompreject); catch; end   %stores the Id of the components to be rejected
-
-if nargin < 2 || isempty(IC)
-    if ~isempty(mybadcomps)
-        IC = size(EEG.icawinv,2);
-        IC = IC - size(mybadcomps,2);            %stores the number to be the next components analysis
-        %fprintf('Rejecting selected components... \r');
-        %[EEG,com] = pop_subcomp(EEG, mybadcomps, 0);       % actually removes the flagged components
-        EEG = eegh(com, EEG);
+if ischar(IC) || (isstring(IC) && isscalar(IC))
+    if ~strcmpi(IC,'n-1')
+        error('QuickLab:InvalidComponents','Use a positive component count or ''n-1''.');
     end
-    [EEG,com] = pop_par_runica(EEG,'extended', EXTENDED,'icatype',type, 'verbose',VERBOSE);
-    EEG = eegh(com, EEG);
+    previousCount = size(EEG.icaweights,1);
+    if previousCount == 0, previousCount = dataRank; end
+    IC = min(previousCount,dataRank)-1;
+end
+if isempty(IC), IC = dataRank; end
+if ~isnumeric(IC) || ~isscalar(IC) || ~isfinite(IC) || IC ~= fix(IC) || IC < 1 || IC > dataRank
+    error('QuickLab:InvalidComponents', ...
+        'Choose 1 to %d components. This dataset has %d channels and estimated rank %d.',dataRank,size(EEG.data,1),dataRank);
+end
+fprintf('QuickLab ICA: %d channels, estimated rank %d, %d components, algorithm %s.\n',size(EEG.data,1),dataRank,IC,type);
+options = {'icatype',type,'extended',EXTENDED,'verbose',VERBOSE};
+if IC < size(EEG.data,1), options = [options {'pca',IC}]; end
+if strcmpi(type,'binica')
+    EEG = quicklab_binica(EEG,IC,EXTENDED);
+    com = sprintf('EEG = quick_PCA(EEG,%d,''binica'',0);',IC);
 else
-
-    if ~isempty(mybadcomps)
-        fprintf('Rejecting selected components... \r');
-        [EEG,com] = pop_subcomp(EEG, mybadcomps, 0);       % actually removes the flagged components
-        EEG = eegh(com, EEG);
-    end
-    if ischar(IC)
-        IC = size(EEG.icaact,1)-1;
-    end
-    [EEG,com] = pop_par_runica(EEG,'extended', EXTENDED,'icatype',type,'pca',IC, 'verbose',VERBOSE);
-    EEG = eegh(com, EEG);
+    [EEG,com] = pop_runica(EEG,options{:});
 end
-if disp
-    [EEG,com] = quick_IClabel(EEG);
-    %com = pop_eegplot_w2(EEG, 2, 2, 1, 1);
-    EEG = eegh(com, EEG);
+EEG = eegh(com,EEG);
+info.components = IC;
+info.algorithm = type;
+EEG.etc.quicklab_ica = info;
+if showPlots
+    [EEG,plotcom] = quick_IClabel(EEG);
+    EEG = eegh(plotcom,EEG);
 end
-
-%com = sprintf('quick_PCA( %s, %s,%s,%s )', EEG,IC,type,disp);
 end

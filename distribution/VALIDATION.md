@@ -1,5 +1,35 @@
 # Validation of the EEGLAB replacement build
 
+## Desktop 1.3.0 source checks, 13 November 2026
+
+MATLAB R2023b Update 3 on Windows passed 29 QuickLab tests, including the
+Infinity/Average comparison, centered rank estimation, real MATLAB ICA,
+Windows BINICA on 29-channel/rank-25 single-precision data, requested PCA
+dimensions, N-1 with empty activations, unchanged input data, save/reload and
+the actual frequency response of the corrected high-pass menu.
+
+Integration checks exercised the real file-control callbacks: save/reload,
+folder selection/cancellation/empty folders, previous/next boundaries,
+redraw, duplicate-control prevention and retention of unsaved datasets.
+The packaged candidate registered all 53 inventoried plugins plus EEG-BIDS,
+found all 31 directly called QuickLab menu functions, and completed comparison,
+ICA and NeuroLode examples. The full default ICA/ICLabel/component-view path
+passed without starting a parallel pool.
+
+BINICA is pinned to SCCN commit `ec0004fd64213ca51290eff38636237e706b38b5`.
+Its EXE and OpenBLAS library are supplied with source and license; upstream
+recordings are excluded. Synthetic ICA examples have four channels, rank
+three and three components; relative reconstruction error was approximately
+`3e-8` (required maximum `1e-5`).
+
+The updater passed 16 checks, Windows reporting passed 18 checks, and the
+reporting service passed 18 Node/PostgreSQL/OIDC tests with the new catalog.
+Native window inspection could not attach to MATLAB in this environment;
+GUI behavior was verified through MATLAB's actual control callbacks. DipFit
+now uses the installed settings dialog and preserves valid alignment; this
+is not a validation of anatomical fit quality or every third-party workflow.
+Specialized methods may still require licensed MATLAB toolboxes or GPU hardware.
+
 ## Desktop 1.2.1, 13 November 2026
 
 On Windows PowerShell 5.1 and MATLAB R2023b Update 3: 18 reporting checks,

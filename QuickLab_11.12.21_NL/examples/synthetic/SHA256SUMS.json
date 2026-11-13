@@ -4,5 +4,7 @@
   "expected/channel_differences.csv": "a4de34081829da63bbe83866ac9de6966e08134cb990f33f00cb42cc09ebac41",
   "expected/comparison.png": "d11954b9f4b298824e061e6215e4def5c594c84ea6e8b58a48b98d91a537b698",
   "expected/metrics.csv": "de1caec06e5081862c9574fcd680761cb1a8f7bf72e00f8172b3b4cb8ad8f351",
-  "expected/rms_by_channel.png": "87c62a150492cc3236857f67b2d15d9c7b675abf71670941e4fe0245f4a00e86"
+  "expected/rms_by_channel.png": "87c62a150492cc3236857f67b2d15d9c7b675abf71670941e4fe0245f4a00e86",
+  "data/synthetic_rank3.set": "43c2b58b1fc7656e4d399aec99900300de5ddaec6d1e5581458d5c7ccdc70841",
+  "expected/ica_metrics.csv": "202746eee09e983ff9d834fdb68d14749d77cf57a37430dd4c9064167b1dad7c"
 }

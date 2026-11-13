@@ -181,7 +181,7 @@ fig = figure('Visible','off'); cleanup = onCleanup(@() close(fig)); %#ok<NASGU>
 uimenu(fig,'Label','Plot');
 s.no_check = ''; c.store_and_hist = '';
 vers = eegplugin_QuickLab(fig,s,c);
-tc.verifyEqual(vers,'1.0.0');
+tc.verifyEqual(vers,'1.1.0');
 eegplugin_QuickLab(fig,s,c);
 tc.verifyNumElements(findall(fig,'Type','uimenu','Tag','quicklab_menu'),1);
 old = findall(fig,'Type','uimenu','Label','Plot Last Files Data Differences');
@@ -193,6 +193,6 @@ end
 
 function testVersionProbeDoesNotCreateFigure(tc)
 before = findall(groot,'Type','figure');
-tc.verifyEqual(eegplugin_QuickLab,'1.0.0');
+tc.verifyEqual(eegplugin_QuickLab,'1.1.0');
 tc.verifyEqual(findall(groot,'Type','figure'),before);
 end

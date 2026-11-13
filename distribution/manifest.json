@@ -16,6 +16,15 @@
       "sha256": "8d6e3b48934671cddfae1774d528569ea8d90e964a0f1e1885f7a7a756d7bbc8",
       "url": "https://codeload.github.com/exporl/mwf-artifact-removal/zip/85115641b36b711a4263eeb83f60e4706ea4e732",
       "version": "85115641"
+    },
+    {
+      "name": "BINICA",
+      "folder": "BINICA",
+      "version": "ec0004fd",
+      "archive_root": "binica-ec0004fd64213ca51290eff38636237e706b38b5/",
+      "url": "https://codeload.github.com/sccn/binica/zip/ec0004fd64213ca51290eff38636237e706b38b5",
+      "sha256": "1dc0c0e55bea45673c60aaa9782e4a6215f382578d199091cc55e8f1e0dcbe8a",
+      "notes": "Official SCCN Windows BINICA executable, OpenBLAS runtime, source and license. Upstream sample recordings excluded."
     }
   ],
   "plugins": [
@@ -524,16 +533,16 @@
       "version": "0.57.0"
     },
     {
-      "archive_root": "QuickLab-cdd8b5b077d9dd9a6fb0ca6cb38ce308a8f2b74e/QuickLab_11.12.21_NL/",
-      "bytes": 68567654,
-      "commit": "cdd8b5b077d9dd9a6fb0ca6cb38ce308a8f2b74e",
-      "folder": "QuickLabMPG1.0.0",
+      "archive_root": "QuickLab-acc856281a15865e587987641c54aa82d2ac68ec/QuickLab_11.12.21_NL/",
+      "bytes": 70216111,
+      "commit": "acc856281a15865e587987641c54aa82d2ac68ec",
+      "folder": "QuickLabMPG1.1.0",
       "name": "QuickLab",
-      "notes": "Maintained MPG lab edition, distinct from catalog QuickLab 0.91; includes Infinity/Average comparison and synthetic examples.",
+      "notes": "Lab edition: restored file controls, included Windows BINICA, rank-aware ICA/PCA, client-side component graphics, portable DIPFIT settings, corrected high-pass menu, synthetic ICA example.",
       "observed": "0.91 plus custom unversioned copy",
-      "sha256": "ba7d25d01b8ba5bd8731053df028f1c7b22277bb35ea048984bbd7101d9c16f8",
-      "url": "https://codeload.github.com/MPG-Git/QuickLab/zip/cdd8b5b077d9dd9a6fb0ca6cb38ce308a8f2b74e",
-      "version": "1.0.0"
+      "sha256": "0b235ca8cade31745627f97774ed4cfe5881d5a800a20054b1446946a287a2ad",
+      "url": "https://codeload.github.com/MPG-Git/QuickLab/zip/acc856281a15865e587987641c54aa82d2ac68ec",
+      "version": "1.1.0"
     },
     {
       "archive_root": "RELAX-2.0.1/",
