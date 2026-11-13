@@ -25,6 +25,7 @@ $process=Start-Process -FilePath (Join-Path $env:WINDIR 'System32\WindowsPowerSh
 if($process.ExitCode -eq 0){throw 'Failed worker reported success'}
 $files=@(Get-ChildItem (Join-Path $homeRoot 'reporting\history') -Filter 'report-*.json')
 if($files.Count -ne 1){throw 'Worker did not capture exactly one report'}
+if(-not (Test-Path -LiteralPath ($descriptor+'.reported'))){throw 'Worker did not confirm that its report was saved'}
 $json=Get-Content -Raw $files[0].FullName; $report=$json | ConvertFrom-Json
 if($report.schemaVersion -ne 2 -or $report.update.stage -ne 'download' -or $report.update.reason -ne 'access-denied' -or $report.update.targetVersion -ne '1.2.2'){throw 'Failure details lost'}
 if($json -match 'PRIVATE|Jane|recording.set|SECRET'){throw 'Sensitive text escaped'}

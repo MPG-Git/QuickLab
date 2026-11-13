@@ -43,15 +43,20 @@ try {
                 $state = Read-DesktopState $HomeRoot
             } catch {
                 # The worker queues the detailed failure before it exits. If it
-                # could not start, record that failure here as well.
-                if (-not $worker -and (Get-Command Write-DesktopDiagnostic -ErrorAction SilentlyContinue)) {
+                # could not start or died before capture, record a fallback.
+                $recorded=$descriptor -and (Test-Path -LiteralPath ($descriptor+'.reported'))
+                if (-not $recorded -and (Get-Command Write-DesktopDiagnostic -ErrorAction SilentlyContinue)) {
                     $detail=Get-UpdateFailureDetail $_ (New-UpdateDetail $update.version)
-                    Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 21 $detail
+                    if ($worker -and $worker.HasExited) { $detail.exitCode=[int]$worker.ExitCode }
+                    $recorded=Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 21 $detail -PassThru
                     Start-UpdateReportSender $HomeRoot $state.current.path
                 }
                 [IO.File]::AppendAllText((Join-Path $HomeRoot 'update-check.log'),[DateTime]::UtcNow.ToString('o') + ' ' + $_.Exception.Message + [Environment]::NewLine)
                 $reportMessage='Automatic reporting is off. You can turn it on in Error reporting settings.'
-                if (Test-ReportingConsent $HomeRoot) { $reportMessage='Technical update details will be sent automatically. If offline, reporting will retry when you next open EEGLAB.' }
+                if (Test-ReportingConsent $HomeRoot) {
+                    $reportMessage='Technical update details will be sent automatically. If offline, reporting will retry when you next open EEGLAB.'
+                    if (-not $recorded) { $reportMessage='The automatic report could not be saved. Please tell Matt the update failed.' }
+                }
                 [Windows.Forms.MessageBox]::Show("The update could not finish. Your previous version will open.`n`n"+$reportMessage,'EEGLAB update needs help') | Out-Null
                 $state = Read-DesktopState $HomeRoot
             } finally { $progress.Close(); $progress.Dispose() }

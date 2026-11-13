@@ -11,7 +11,8 @@ try {
     Write-Output ('UPDATE_COMPLETE=' + $state.current.version)
 } catch {
     $detail=Get-UpdateFailureDetail $_ $detail
-    Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 21 $detail
+    $reportId=Write-DesktopDiagnostic $HomeRoot $state.current.path 'update' 21 $detail -PassThru
+    if ($reportId) { try { [IO.File]::WriteAllText(($DescriptorPath+'.reported'),$reportId) } catch { } }
     Start-UpdateReportSender $HomeRoot $state.current.path
     throw
 }

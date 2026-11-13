@@ -35,7 +35,7 @@ function Test-TechnicalReport($Report,$Catalog) {
         return $true
     } catch { return $false }
 }
-function Write-DesktopDiagnostic([string]$HomeRoot,[string]$VersionRoot,[string]$Context,[int]$Code,$Detail=$null) {
+function Write-DesktopDiagnostic([string]$HomeRoot,[string]$VersionRoot,[string]$Context,[int]$Code,$Detail=$null,[switch]$PassThru) {
     try {
         if ($Context -cnotin @('update','validation') -or $Code -notin @(20,21,22)) { return }
         $catalog=Read-ReportingCatalog $VersionRoot
@@ -61,6 +61,7 @@ function Write-DesktopDiagnostic([string]$HomeRoot,[string]$VersionRoot,[string]
             [IO.File]::WriteAllText($tmp,($r | ConvertTo-Json -Depth 8 -Compress),(New-Object Text.UTF8Encoding($false)))
             [IO.File]::Move($tmp,$file)
         }
+        if ($PassThru) { return $r.eventId }
     } catch { } # Never interrupt startup or the updater.
 }
 function Send-TechnicalReportBatch([string]$HomeRoot,[string]$VersionRoot) {
