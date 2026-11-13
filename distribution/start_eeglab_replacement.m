@@ -12,7 +12,8 @@ restoredefaultpath;
 addpath(root,core);
 cd(root);
 [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab('full');
-% Fileio also contains ft_defaults; prefer the full FieldTrip-lite toolbox.
+% The installer omits Fileio's standalone bootstrap so there is exactly one
+% FieldTrip initializer. Let ft_defaults select paths; never genpath FieldTrip.
 addpath(fullfile(core,'plugins','Fieldtrip-lite250523'),'-begin');
 ft_defaults;
 addpath(genpath(fullfile(root,'dependencies','MWF')));

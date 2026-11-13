@@ -40,7 +40,7 @@ function Get-VerifiedArchive($item, [string]$cacheName) {
     return $zipPath
 }
 
-function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$destination, [switch]$Core, [switch]$SyntheticOnly) {
+function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$destination, [switch]$Core, [switch]$SyntheticOnly, [switch]$FileioWithFieldTrip) {
     $fullDestination = [IO.Path]::GetFullPath($destination)
     $boundary = $fullDestination.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     [IO.Directory]::CreateDirectory($fullDestination) | Out-Null
@@ -57,6 +57,10 @@ function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$dest
             if ($Core -and $relative -match '^plugins/' -and $relative -notmatch '^plugins/EEG-BIDS/') { continue }
             # Legacy QuickLab recordings have no synthetic-data provenance.
             if ($SyntheticOnly -and $relative -match '\.(set|fdt)$' -and $relative -notmatch '^examples/synthetic/') { continue }
+            # Fileio's standalone bootstrap duplicates FieldTrip's initializer.
+            # This bundle always supplies the full FieldTrip-lite initializer.
+            # Keep every Fileio reader/writer; do not disable FieldTrip warnings.
+            if ($FileioWithFieldTrip -and $relative -eq 'ft_defaults.m') { continue }
             $path = [IO.Path]::GetFullPath((Join-Path $fullDestination $relative))
             if (-not $path.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) {
                 throw "Archive entry escapes its destination: $name"
@@ -78,7 +82,17 @@ $installed = @()
 foreach ($plugin in $manifest.plugins) {
     $archive = Get-VerifiedArchive $plugin ($plugin.name + '.zip')
     $folder = Join-Path (Join-Path $core 'plugins') $plugin.folder
-    $count = Expand-SelectedArchive $archive $plugin.archive_root $folder -SyntheticOnly:($plugin.name -eq 'QuickLab')
+    $fileioWithFieldTrip = $plugin.name -eq 'Fileio' -and @($manifest.plugins | Where-Object { $_.name -eq 'Fieldtrip-lite' }).Count -eq 1
+    $count = Expand-SelectedArchive $archive $plugin.archive_root $folder -SyntheticOnly:($plugin.name -eq 'QuickLab') -FileioWithFieldTrip:$fileioWithFieldTrip
+    if ($plugin.name -eq 'EYE-EEG') {
+        # The official 1.0.1 archive labels its hook "1.01"; normalize only
+        # that known metadata spelling, with a guard against upstream changes.
+        $hook = Join-Path $folder 'eegplugin_eye_eeg.m'
+        $text = [IO.File]::ReadAllText($hook)
+        $old = "vers = 'eye_eeg_v1.01';"
+        if ($plugin.version -ne '1.0.1' -or $text.Split(@($old),[StringSplitOptions]::None).Length -ne 2) { throw 'Review EYE-EEG version metadata for this archive.' }
+        [IO.File]::WriteAllText($hook,$text.Replace($old,"vers = '1.0.1';"),(New-Object Text.UTF8Encoding($false)))
+    }
     $installed += [pscustomobject]@{name=$plugin.name;version=$plugin.version;files=$count;sha256=$plugin.sha256}
     Write-Host "Installed $($plugin.name) $($plugin.version) ($count files)"
 }
@@ -89,7 +103,7 @@ foreach ($dependency in $manifest.dependencies) {
     Write-Host "Installed supplemental dependency $($dependency.name)"
 }
 Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $target 'manifest.json')
-foreach ($file in 'start_eeglab_replacement.m','check_eeglab_replacement.m','run_replacement_examples.m','README.md','VALIDATION.md','PLUGIN_INVENTORY.md') {
+foreach ($file in 'start_eeglab_replacement.m','check_eeglab_replacement.m','run_replacement_examples.m','README.md','VALIDATION.md','PLUGIN_INVENTORY.md','VERSION_AUDIT.md') {
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot $file) -Destination (Join-Path $target $file)
 }
 $installed | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $target 'COMPLETE.json') -Encoding UTF8

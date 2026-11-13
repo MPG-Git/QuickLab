@@ -10,7 +10,7 @@ previousPath = path;
 cleanup = onCleanup(@() path(previousPath)); %#ok<NASGU>
 mkdir(outputDirectory);
 core = fullfile(root,'eeglab2026.1.0');
-quick = fullfile(core,'plugins','QuickLab','examples','synthetic');
+quick = fullfile(core,'plugins','QuickLabMPG1.0.0','examples','synthetic');
 neuro = fullfile(core,'plugins','Neurolode','examples','synthetic');
 addpath(quick,'-begin');
 clear demo_prepare demo_verify demo_portable_set;
