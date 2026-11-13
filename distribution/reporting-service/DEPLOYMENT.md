@@ -1,5 +1,15 @@
 # Hosted deployment
 
+## Desktop 1.3.0, 13 November 2026
+
+The live service imports `5d7ce55bdd30a4e64eda15f4dde1c70fa5d5ae01` with the
+1.3.0 catalog (13,174 shipped MATLAB source files, including the restored
+QuickLab controls and BINICA wrapper). The private collector at
+`0b54fa5d33376a82ab79643b116fc1b18e283ebd` passed live run `43524677058`,
+including delivery and grouping in synthetic issue #20. Previous catalogs,
+consent and privacy filtering remain supported; no credential or schema
+migration was required.
+
 ## Detailed update reports, 13 November 2026
 
 The live function now imports QuickLab commit
