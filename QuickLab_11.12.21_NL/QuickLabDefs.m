@@ -68,7 +68,7 @@ KEEPREF = 'on';
 CORRMAPDEFS = [''];
 
 %% Defaults for PCA/ICA & ICLABEL
-ICATYPE = 'binica';
+ICATYPE = 'auto'; % Bundled Windows BINICA when available, otherwise MATLAB runica.
 EXTENDED = 1;
 VERBOSE = 'off';
 PCADEFS = ['icatype',ICATYPE,'extended',EXTENDED,'verbose',VERBOSE];

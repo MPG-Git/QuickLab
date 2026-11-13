@@ -10,7 +10,7 @@ function [EEG,com] = quick_dotloc(EEG)
 
 [EEG,com] = quick_PCA(EEG,[],[],0);
 
-[EEG] = pop_saveset(EEG, 'filename', [strcat( EEG.filename(1:end-4),'Hm92Ep6ICA','.set')],'filepath',EEG.filepath);
+EEG = quick_eegsave(EEG,'Hm92Ep6ICA');
 
 %eeglab redraw
 end

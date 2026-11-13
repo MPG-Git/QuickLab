@@ -25,12 +25,19 @@ if nargin < 2
     comps = []; 
 end
 
-%EEG = pop_par_dipfit_settings(EEG);
-% EEG = pop_par_dipfit_settings( EEG, 'hdmfile','C:\\MATLAB\\GitHub\\eeglab-eeglab2019\\plugins\\dipfit3.3\\standard_BEM\\standard_vol.mat','coordformat','MNI','mrifile','C:\\MATLAB\\GitHub\\eeglab-eeglab2019\\plugins\\dipfit3.3\\standard_BEM\\standard_mri.mat','chanfile','C:\\MATLAB\\GitHub\\eeglab-eeglab2019\\plugins\\dipfit3.3\\standard_BEM\\elec\\standard_1005.elc','coord_transform',[0.05476 -17.3653 -8.1318 0.075502 0.0031836 -1.5696 11.7138 12.7933 12.213] ,'chansel',[1:size(EEG.icawinv,1)] );
-% EEG = pop_par_multifit(EEG, [1:size(EEG.icawinv,2)] ,'threshold',100,'plotopt',{'normlen' 'on'});
-% acronym  = 'DF'; 
-[EEG,com] = pop_dipfit_settings( EEG, 'hdmfile','C:\\GitHub\\eeglab\\plugins\\dipfit3.7\\standard_BEM\\standard_vol.mat','coordformat','MNI','mrifile','C:\\GitHub\\eeglab\\plugins\\dipfit3.7\\standard_BEM\\standard_mri.mat','chanfile','C:\\GitHub\\eeglab\\plugins\\dipfit3.7\\standard_BEM\\elec\\standard_1005.elc','coord_transform',[0.05476 -17.3653 -8.1318 0.075502 0.0031836 -1.5696 11.7138 12.7933 12.213] ,'chansel',[1:EEG.nbchan] );
-EEG = eegh(com, EEG);
-[EEG,com] = pop_par_multifit2(EEG, comps ,'threshold',100,'plotopt',{'normlen','on'},'dipoles',dipoles);
-EEG = eegh(com, EEG);
+% Resolve models through the installed DIPFIT settings dialog. Preserve an
+% existing valid alignment; never substitute a developer's hard-coded paths
+% or silently assume the old lab's electrode coordinate transform.
+com = '';
+if isempty(EEG.icaweights)
+    error('QuickLab:NoICA','Run ICA before fitting dipoles.');
+end
+if ~isfield(EEG,'dipfit') || ~isfield(EEG.dipfit,'hdmfile') || ~isfile(EEG.dipfit.hdmfile)
+    [EEG,com] = pop_dipfit_settings(EEG);
+    if isempty(com), return; end
+    EEG = eegh(com,EEG);
+end
+if isempty(comps), comps = 1:size(EEG.icaweights,1); end
+[EEG,com] = pop_multifit(EEG,comps,'threshold',100,'plotopt',{'normlen','on'},'dipoles',dipoles);
+EEG = eegh(com,EEG);
 end

@@ -1,4 +1,4 @@
-% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.0.0.
+% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.1.0.
 %                        QuickLab is a compilation of modified EEGLAB functions
 %                        for experienced users that wish to speed up manual
 %                        process, made by Ugo Bruzadin Nunes in
@@ -24,15 +24,18 @@
 function vers = eegplugin_QuickLab(fig, try_strings, catch_strings)
 
 % EEGLAB parses a textual version. A numeric value is displayed as v?.
-% Install in QuickLabMPG1.0.0 to distinguish this maintained fork from the
+% Install in QuickLabMPG1.1.0 to distinguish this maintained fork from the
 % historical QuickLab 0.91 catalog package. The menu remains "QuickLab".
-vers = '1.0.0';
+vers = '1.1.0';
 if nargin < 1 || isempty(fig), return; end
 % Repeated discovery must not create a second copy of this build's menu.
 % Duplicate installations still need to be removed from the MATLAB path.
+quicklab_controls(fig);
 if ~isempty(findall(fig, 'Type', 'uimenu', 'Tag', 'quicklab_menu')), return; end
 % --- QuickLab sumermenu placeholder
 supermenu = uimenu(fig, 'label', 'QuickLab', 'Tag', 'quicklab_menu');
+uimenu(supermenu,'label','Check QuickLab setup','callback', ...
+    @(~,~) quicklab_dependency_report(fig));
 
 % --- Call QuickLab DEFS
 
@@ -111,6 +114,12 @@ uimenu(supermenu, 'label','Quick DotLoc Defaults','callback',...
 
 % --- second submenu: Quick ICA/PCAs
 pcamenu = uimenu (supermenu, 'label', 'Quick PCA');
+uimenu(pcamenu,'label','ICA - MATLAB runica','callback', ...
+    '[EEG,com] = quick_PCA(EEG,[],''runica'');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;');
+uimenu(pcamenu,'label','ICA - Windows BINICA','callback', ...
+    '[EEG,com] = quick_PCA(EEG,[],''binica'');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;');
+uimenu(pcamenu,'label','BINICA no plot','callback', ...
+    '[EEG,com] = quick_PCA(EEG,[],''binica'',0);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;');
 
 dipfitmenu = uimenu (pcamenu, 'label', 'Quick PCA and DipFit');
 
@@ -118,7 +127,7 @@ uimenu( dipfitmenu, 'label', 'Quick ICA & DipFit', 'callback', ...
     ['EEG = quick_PCA(EEG);EEG = quick_dipfit(EEG);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
 
 uimenu( dipfitmenu, 'label', 'Quick N-1 PCA & DipFit', 'callback', ...
-    ['EEG = quick_PCA(EEG, strcat(size(EEG.icaact,1)-1));EEG = quick_dipfit(EEG);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
+    ['EEG = quick_PCA(EEG, ''n-1'');EEG = quick_dipfit(EEG);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
 
 for d=6:2:50
 uimenu( dipfitmenu, 'label', strcat('PCA ',num2str(d),' & DipFit'), 'callback', ...
@@ -132,7 +141,7 @@ uimenu( pcamenu, 'label', 'ICA', 'callback', ...
     ['[EEG,com] = quick_PCA(EEG);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
 
 uimenu( pcamenu, 'label', 'N-1 PCA', 'callback', ...
-    ['[EEG,com] = quick_PCA(EEG,strcat(size(EEG.icaact,1)-1));[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
+    ['[EEG,com] = quick_PCA(EEG,''n-1'');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
 
 for i=4:35
 uimenu( pcamenu, 'label', strcat('PCA ',num2str(i)), 'callback', ...
@@ -157,7 +166,7 @@ end
 %             ['[EEG,com] = quick_PCA(EEG,[],''cudaica'');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
 %         
 %         uimenu( cudamenu, 'label', 'N-1 PCA', 'callback', ...
-%             ['[EEG,com] = quick_PCA(EEG,strcat(size(EEG.icaact,1)-1)),''cudaica'');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
+%             ['[EEG,com] = quick_PCA(EEG,''n-1''),''cudaica'');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
 %         
 %         for i=4:35
 %             uimenu( cudamenu, 'label', strcat('PCA ',num2str(i)), 'callback', ...
@@ -228,7 +237,7 @@ filtermenu = uimenu (channelmenu, 'label', 'Quick Filter');
 
  for a=0.5:0.5:22
  uimenu( filtermenu, 'label', strcat('Quick High Pass ',num2str(a)), 'callback', ...
-     ['EEG = quick_lowpass(EEG,' num2str(a) ');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
+     ['EEG = quick_highpass(EEG,' num2str(a) ');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
  end
 
 for b=14:40
@@ -300,10 +309,10 @@ uimenu( corrmenu, 'label', 'Quick Run CorrMap', 'callback', ...
 parmenu = uimenu( supermenu, 'label', 'Quick Parallel Processes');
 
 uimenu( parmenu, 'label', 'Parallel DipFit 1 Dipole', 'callback', ...
-    ['[EEG] = quick_dipfit(EEG); eeg_store(ALLEEG, EEG, CURRENTSET); eeglab redraw;']);
+    ['[EEG] = quick_dipfit(EEG); [ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET); eeglab redraw;']);
 
 uimenu( parmenu, 'label', 'Parallel DipFit 2 Dipoles', 'callback', ...
-    ['[EEG] = quick_dipfit(EEG,[],2); eeg_store(ALLEEG, EEG, CURRENTSET); eeglab redraw;']);
+    ['[EEG] = quick_dipfit(EEG,[],2); [ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET); eeglab redraw;']);
 % try
 %     if isstruct(EEG)
 %          h = findobj(gcf, 'tag', 'win1');

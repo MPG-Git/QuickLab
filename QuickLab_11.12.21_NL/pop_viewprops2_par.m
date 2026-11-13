@@ -204,47 +204,7 @@ tic
 X = zeros(length(chanorcomp),1);
 Y = zeros(length(chanorcomp),1);
 
-haspar = [];
-haspar = ver('parallel');
-if ~isempty(haspar)
-    parfor ri = chanorcomp
-        %% plot the topoplot headmap
-
-        figure('tag',strcat('fig',int2str(ri),currentfigtag),Visible='off');
-        ax(ri) = axes('Tag',strcat('Ax',int2str(ri),currentfigtag));
-        if typecomp
-            to(ri) = topoplot( ri, EEG.chanlocs, 'chaninfo', EEG.chaninfo, ...
-                'electrodes','off', 'style', 'blank', 'emarkersize1chan', 12);
-        else
-            if plotelec
-                to(ri) = topoplot( EEG.icawinv(:,ri), EEG.chanlocs, 'verbose', ...
-                    'off', 'style' , 'fill', 'chaninfo', EEG.chaninfo, 'numcontour', 8);
-            else
-                to(ri) = topoplot( EEG.icawinv(:,ri), EEG.chanlocs, 'verbose', ...
-                    'off', 'style' , 'fill','electrodes','off', 'chaninfo', EEG.chaninfo, 'numcontour', 8);
-            end
-
-        end
-        checkcom = {@checkbox,int2str(ri),0};
-        set(to(ri),'ButtonDownFcn', checkcom);
-        axis square;
-
-        % NEED TO PLOT ICLABEL
-        if plot_labels == 1
-            if ~typecomp && isfield(EEG.etc, 'ic_classification')
-                classifiers = fieldnames(EEG.etc.ic_classification);
-                if ~isempty(classifiers)
-                    classifier_name = 'ICLabel';
-                    [prob, classind] = max(EEG.etc.ic_classification.(classifier_name).classifications(ri, :));
-                    t = title(sprintf('%s : %.1f%%', ...
-                        EEG.etc.ic_classification.(classifier_name).classes{classind}, ...
-                        prob*100));
-                    set(t, 'Position', get(t, 'Position') .* [1 -1.2 1])
-                end
-            end
-        end
-    end
-else
+% Graphics must stay on the MATLAB client, never on parallel workers.
     for ri = chanorcomp
         %% plot the topoplot headmap
 
@@ -282,7 +242,6 @@ else
             end
         end
     end
-end
 
 for ri = chanorcomp
     
