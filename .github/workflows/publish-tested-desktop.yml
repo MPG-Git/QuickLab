@@ -1,0 +1,45 @@
+name: Publish tested EEGLAB Desktop 1.2.0
+on:
+  push:
+    branches: [codex/desktop-release-1-2-0]
+    paths:
+      - '.github/workflows/publish-tested-desktop.yml'
+      - 'release-publish/**'
+permissions:
+  contents: write
+concurrency:
+  group: publish-eeglab-desktop-v1.2.0
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact locally tested artifacts and release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = 'MPG-Git/QuickLab'
+          test "$(gh api repos/MPG-Git/QuickLab/git/ref/tags/eeglab-desktop-v1.2.0 --jq .object.sha)" = '0ff6d284cb26e2bfc97a2a223978217e93c177cc'
+          cd release-publish
+          sha256sum --check SHA256SUMS
+          python3 - <<'PY'
+          import json, zipfile
+          with zipfile.ZipFile('EEGLAB2026-Update.zip') as archive:
+              release=json.loads(archive.read('desktop/release.json'))
+              assert release['version']=='1.2.0' and release['tag']=='eeglab-desktop-v1.2.0'
+          PY
+      - name: Publish verified installer and update archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create eeglab-desktop-v1.2.0 \
+            release-publish/EEGLAB2026-Setup.exe release-publish/EEGLAB2026-Update.zip \
+            --repo MPG-Git/QuickLab --verify-tag --latest \
+            --title 'EEGLAB Desktop 1.2.0 — clean startup and current lab plugins' \
+            --notes-file release-publish/NOTES.md
