@@ -45,7 +45,7 @@ microvolts, within 1e-6. The average-reference channel mean must be below 1e-6.
 The maximum is about 2.999921 microvolts (the sampled sine misses its exact peak).
 
 For manual use, load both `.set` files with EEGLAB's **File > Load existing dataset**.
-Choose **QuickLab GUNN > Quick Plots > Other > Plot Last Files Data Differences**.
+Choose **QuickLab > Quick Plots > Other > Plot Last Files Data Differences**.
 Select the illustrative Infinity dataset first and Average second. Compare the
 RMS chart with `expected/rms_by_channel.png`; use the figure's print/export
 controls to save or print it. The command-line runner exercises the same
@@ -90,4 +90,15 @@ count and rank with `expected/ica_metrics.csv`; the reconstruction error must
 be below `1e-5`. Exact ICA weights, signs and component order need not match.
 The Windows desktop bundle includes BINICA; an ordinary standalone plugin
 installation can run the MATLAB `runica` example without that executable.
+
+The familiar bottom row reads **Adds to name**, **Save (+)**, **New**, and
+**Load Folder**, followed by the available files and navigation arrows.
+The ICA information line shows `No; Rank (3)` before ICA and `3; Rank (3)`
+afterward. Comparison menu entries appear after two datasets are loaded.
+
+`data/synthetic_rank3FFT.jpg` is the supplied FFT preview for this dataset.
+It appears in the right-hand space of the main EEGLAB window when that file
+is loaded. Changing to a dataset without a matching picture clears the preview.
+Regenerate the picture in a fresh output folder using
+`generate_fft_preview(fullfile(pluginRoot,'examples','synthetic','data','synthetic_rank3.set'), outputFolder)`.
 

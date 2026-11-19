@@ -8,11 +8,12 @@ For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distri
 The desktop installer finds MATLAB, creates shortcuts, and checks GitHub for
 tested updates. Updates are validated before activation, with a previous-version
 shortcut for rollback.
-Desktop version **1.3.0** restores **Save (+)**, filename additions, **Load Folder**,
-Previous/Next and the file selector. It includes Windows **BINICA** and its
+Desktop version **1.3.1** restores **Save (+)**, filename additions, **Load Folder**,
+the familiar toolbar order, filepath and ICA/rank rows, saved FFT preview,
+Previous/Next and the file selector. See the [layout guide](docs/GOLDEN_LAYOUT.md). It includes Windows **BINICA** and its
 runtime library, handles rank-reduced ICA/PCA, fixes the high-pass menu, and
 keeps component graphics on the MATLAB client. Our lab edition is registered
-as **QuickLabMPG 1.1.0**. See the [workflow guide](QuickLab_11.12.21_NL/WORKFLOWS.md).
+as **QuickLabMPG 1.1.1**. See the [workflow guide](QuickLab_11.12.21_NL/WORKFLOWS.md).
 
 Existing users can close MATLAB, open **EEGLAB 2026**, and click **Yes**.
 **Practice data** runs the comparison, ICA and NeuroLode examples, with

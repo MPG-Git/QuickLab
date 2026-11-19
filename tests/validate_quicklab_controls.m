@@ -8,15 +8,39 @@ e.setname='Synthetic controls A';
 a=pop_saveset(e,'filename','A.set','filepath',folder);
 e.data=e.data*2; e.setname='Synthetic controls B';
 pop_saveset(e,'filename','B.set','filepath',folder);
-assignin('base','ALLEEG',[]); assignin('base','CURRENTSET',0); assignin('base','EEG',a);
 fig=findall(groot,'Tag','EEGLAB'); assert(isscalar(fig));
 quicklab_controls(fig); quicklab_controls(fig,'refresh');
 assert(numel(findall(fig,'Tag','quicklab_controls'))==1);
+assignin('base','ALLEEG',[]); assignin('base','CURRENTSET',0); assignin('base','EEG',eeg_emptyset);
+evalin('base','eeglab redraw;');
+assert(strcmp(get(findall(fig,'Tag','SAVEASBUTTON2'),'Enable'),'off'));
+compare=findall(fig,'Type','uimenu','Label','Compare Datasets (Infinity / Average...)');
+assert(strcmp(get(compare,'Visible'),'off'));
+icaMenu=findall(fig,'Type','uimenu','Label','Quick IClabel & Viewprops+ plot');
+assert(strcmp(get(icaMenu,'Enable'),'off'));
+assignin('base','ALLEEG',a); assignin('base','CURRENTSET',1); assignin('base','EEG',a);
+evalin('base','eeglab redraw;');
+assert(strcmp(get(compare,'Visible'),'off'));
+assert(strcmp(get(findall(fig,'Tag','quicklab_folder'),'Visible'),'on'));
+assert(strcmp(get(findall(fig,'Tag','val11'),'String'),'No; Rank (4)'));
+% The familiar row order and labels must survive redraw and a smaller window.
+tags={'SAVETITLE2','SAVEASBUTTON2','SAVETEXT2','LoadDir2','LoadFileList2'};
+last=-Inf;
+for k=1:numel(tags)
+    pos=get(findall(fig,'Tag',tags{k}),'Position'); assert(pos(1)>last); last=pos(1);
+end
+set(fig,'Units','pixels','Position',[80 80 960 720]); drawnow;
+assert(strcmp(get(findall(fig,'Tag','SAVETITLE2'),'String'),'Adds to name'));
+% A saved FFT preview appears only for its matching dataset, without cd.
+imwrite(uint8(ones(30,60,3)*180),fullfile(folder,'AFFT.jpg'));
+quicklab_controls(fig,'refresh'); assert(isscalar(findall(fig,'Tag','quicklab_fft_preview')));
 before=pwd;
 % Real callbacks, including redraw listeners and previous/next boundary states.
 next=findall(fig,'Tag','LoadDown'); callback=get(next,'Callback'); callback(next,[]);
 e=evalin('base','EEG'); assert(strcmp(e.filename,'B.set'));
 assert(strcmp(get(next,'Enable'),'off'));
+assert(isempty(findall(fig,'Tag','quicklab_fft_preview')));
+assert(strcmp(get(compare,'Visible'),'on') && strcmp(get(compare,'Enable'),'on'));
 previous=findall(fig,'Tag','LoadUp'); callback=get(previous,'Callback'); callback(previous,[]);
 e=evalin('base','EEG'); assert(strcmp(e.filename,'A.set'));
 assert(strcmp(get(previous,'Enable'),'off'));
@@ -35,8 +59,13 @@ e=evalin('base','EEG'); assert(strcmp(e.filename,'B_copy.set'));
 loaded=pop_loadset('filename','B_copy.set','filepath',folder); assert(isequal(loaded.data,e.data));
 assert(strcmp(before,pwd));
 evalin('base','eeglab redraw;');
-assert(contains(get(findall(fig,'Tag','quicklab_rank'),'String'),'Rank: 4/4'));
+assert(contains(get(findall(fig,'Tag','val11'),'String'),'Rank (4)'));
+e.icaweights=eye(4); e.icasphere=eye(4); e.icawinv=eye(4); e.icachansind=1:4;
+all=evalin('base','ALLEEG'); index=evalin('base','CURRENTSET'); all(index)=e;
+assignin('base','ALLEEG',all); assignin('base','EEG',e); evalin('base','eeglab redraw;');
+assert(strcmp(get(icaMenu,'Enable'),'on'));
+assert(strcmp(get(findall(fig,'Tag','val11'),'String'),'4; Rank (4)'));
 report=quicklab_dependency_report(fig,false);
 assert(numel(report.functions)>25 && isempty(report.missingFunctions));
-fprintf('PASS: controls attach/redraw, save/reload, folder/cancel/empty, previous/next and unsaved dataset retention.\n');
+fprintf('PASS: Golden Old row, zero/one/two dataset menus, ICA/rank, saved FFT preview, resize/redraw, save/reload, folder/cancel/empty, previous/next and unsaved dataset retention.\n');
 end

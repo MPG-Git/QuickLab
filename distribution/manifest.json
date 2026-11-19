@@ -533,16 +533,16 @@
       "version": "0.57.0"
     },
     {
-      "archive_root": "QuickLab-acc856281a15865e587987641c54aa82d2ac68ec/QuickLab_11.12.21_NL/",
-      "bytes": 70216111,
-      "commit": "acc856281a15865e587987641c54aa82d2ac68ec",
-      "folder": "QuickLabMPG1.1.0",
+      "archive_root": "QuickLab-a75c7aa82d833258e536c464b2887ef1a93024d5/QuickLab_11.12.21_NL/",
+      "bytes": 71107060,
+      "commit": "a75c7aa82d833258e536c464b2887ef1a93024d5",
+      "folder": "QuickLabMPG1.1.1",
       "name": "QuickLab",
       "notes": "Lab edition: restored file controls, included Windows BINICA, rank-aware ICA/PCA, client-side component graphics, portable DIPFIT settings, corrected high-pass menu, synthetic ICA example.",
       "observed": "0.91 plus custom unversioned copy",
-      "sha256": "0b235ca8cade31745627f97774ed4cfe5881d5a800a20054b1446946a287a2ad",
-      "url": "https://codeload.github.com/MPG-Git/QuickLab/zip/acc856281a15865e587987641c54aa82d2ac68ec",
-      "version": "1.1.0"
+      "sha256": "22bda387c8edffa1490d26428e73ce3cc6eed97ada02055ed70038251ddd905c",
+      "url": "https://codeload.github.com/MPG-Git/QuickLab/zip/a75c7aa82d833258e536c464b2887ef1a93024d5",
+      "version": "1.1.1"
     },
     {
       "archive_root": "RELAX-2.0.1/",

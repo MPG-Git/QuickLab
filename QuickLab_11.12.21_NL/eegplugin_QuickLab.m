@@ -1,4 +1,4 @@
-% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.1.0.
+% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.1.1.
 %                        QuickLab is a compilation of modified EEGLAB functions
 %                        for experienced users that wish to speed up manual
 %                        process, made by Ugo Bruzadin Nunes in
@@ -24,16 +24,17 @@
 function vers = eegplugin_QuickLab(fig, try_strings, catch_strings)
 
 % EEGLAB parses a textual version. A numeric value is displayed as v?.
-% Install in QuickLabMPG1.1.0 to distinguish this maintained fork from the
+% Install in QuickLabMPG1.1.1 to distinguish this maintained fork from the
 % historical QuickLab 0.91 catalog package. The menu remains "QuickLab".
-vers = '1.1.0';
+vers = '1.1.1';
 if nargin < 1 || isempty(fig), return; end
 % Repeated discovery must not create a second copy of this build's menu.
 % Duplicate installations still need to be removed from the MATLAB path.
 quicklab_controls(fig);
 if ~isempty(findall(fig, 'Type', 'uimenu', 'Tag', 'quicklab_menu')), return; end
 % --- QuickLab sumermenu placeholder
-supermenu = uimenu(fig, 'label', 'QuickLab', 'Tag', 'quicklab_menu');
+supermenu = uimenu(fig, 'label', 'QuickLab', 'Tag', 'quicklab_menu', ...
+    'Callback',@(~,~) quicklab_menu_state(fig));
 uimenu(supermenu,'label','Check QuickLab setup','callback', ...
     @(~,~) quicklab_dependency_report(fig));
 
@@ -313,6 +314,7 @@ uimenu( parmenu, 'label', 'Parallel DipFit 1 Dipole', 'callback', ...
 
 uimenu( parmenu, 'label', 'Parallel DipFit 2 Dipoles', 'callback', ...
     ['[EEG] = quick_dipfit(EEG,[],2); [ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET); eeglab redraw;']);
+quicklab_controls(fig,'refresh');
 % try
 %     if isstruct(EEG)
 %          h = findobj(gcf, 'tag', 'win1');

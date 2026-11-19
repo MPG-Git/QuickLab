@@ -1,5 +1,8 @@
 name: Collect EEGLAB technical reports
 on:
+  push:
+    branches: [main]
+    paths: ['diagnostic-sources.json', '.github/workflows/collect-reports.yml']
   workflow_dispatch:
     inputs:
       self_test:
@@ -16,8 +19,21 @@ concurrency:
   group: eeglab-report-delivery
   cancel-in-progress: false
 jobs:
+  request-live-check:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      # Keep the service's schedule/workflow_dispatch identity restriction.
+      # GitHub explicitly supports workflow_dispatch from GITHUB_TOKEN.
+      - run: gh workflow run collect-reports.yml --repo "$GITHUB_REPOSITORY" --ref main -f self_test=true
+        env:
+          GH_TOKEN: ${{ github.token }}
   collect:
-    if: vars.REPORTING_READY == 'true' || inputs.self_test == true
+    if: github.event_name != 'push' && (vars.REPORTING_READY == 'true' || inputs.self_test == true)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
