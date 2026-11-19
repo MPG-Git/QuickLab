@@ -6,32 +6,45 @@ if nargin < 2, action = 'attach'; end
 if ~isgraphics(fig,'figure'), return; end
 if strcmp(action,'attach')
     if ~isempty(findall(fig,'Tag','quicklab_controls')), return; end
-    % Reserve the bottom of the window, once, without editing EEGLAB core.
+    % Keep the Golden Old main-window layout without replacing EEGLAB core.
     children = findall(fig,'Type','uicontrol');
     for k=1:numel(children)
         tag = get(children(k),'Tag');
         if ~isempty(regexp(tag,'^(mainwin|win|val)\d+$','once'))
             units = get(children(k),'Units'); set(children(k),'Units','normalized');
-            pos = get(children(k),'Position'); pos([2 4]) = [.21+.77*pos(2) .77*pos(4)];
+            pos = get(children(k),'Position'); pos([2 4]) = [.10+.88*pos(2) .88*pos(4)];
             set(children(k),'Position',pos,'Units',units);
         end
     end
     panel = uipanel(fig,'Tag','quicklab_controls','Units','normalized', ...
-        'Position',[.025 .025 .95 .19],'Title','QuickLab files','BackgroundColor',get(fig,'Color'));
-    make(panel,'text','SAVETITLE2','Add to filename',[.01 .59 .17 .25],[]);
-    make(panel,'edit','SAVETEXT2','New',[.18 .59 .16 .29],[]);
-    make(panel,'pushbutton','SAVEASBUTTON2','Save (+)',[.36 .59 .16 .3],@(~,~) invoke(fig,'save'));
-    make(panel,'pushbutton','LoadDir2','Load Folder',[.54 .59 .18 .3],@(~,~) invoke(fig,'folder'));
-    make(panel,'pushbutton','LoadUp','Previous',[.74 .59 .12 .3],@(~,~) invoke(fig,'previous'));
-    make(panel,'pushbutton','LoadDown','Next',[.87 .59 .12 .3],@(~,~) invoke(fig,'next'));
-    make(panel,'popupmenu','LoadFileList2',{'Choose a folder'},[.01 .28 .62 .25],@(~,~) invoke(fig,'select'));
-    make(panel,'text','quicklab_rank','Rank: no dataset',[.65 .28 .34 .25],[]);
-    make(panel,'text','quicklab_folder','Folder: none',[.01 .02 .98 .23],[]);
+        'Position',[.025 .035 .95 .075],'BorderType','none','BackgroundColor',get(fig,'Color'));
+    make(panel,'text','SAVETITLE2','Adds to name',[.01 .2 .12 .6],[]);
+    make(panel,'pushbutton','SAVEASBUTTON2','Save (+)',[.14 .2 .11 .65],@(~,~) invoke(fig,'save'));
+    make(panel,'edit','SAVETEXT2','New',[.27 .2 .11 .65],[]);
+    make(panel,'pushbutton','LoadDir2','Load Folder',[.40 .2 .12 .65],@(~,~) invoke(fig,'folder'));
+    make(panel,'popupmenu','LoadFileList2',{'Choose a folder'},[.54 .2 .31 .65],@(~,~) invoke(fig,'select'));
+    make(panel,'pushbutton','LoadUp','<',[.87 .2 .05 .65],@(~,~) invoke(fig,'previous'));
+    make(panel,'pushbutton','LoadDown','>',[.94 .2 .05 .65],@(~,~) invoke(fig,'next'));
+    set(findall(panel,'Tag','LoadUp'),'TooltipString','Previous .set file in this folder');
+    set(findall(panel,'Tag','LoadDown'),'TooltipString','Next .set file in this folder');
+    % The old core used a separate filepath line and left room for FFT images.
+    make(fig,'text','quicklab_folder','Filepath: none',[.05 .755 .89 .035],[]);
+    set(findall(fig,'Tag','quicklab_folder'),'FontName','Courier New','FontSize',10);
+    for k=2:12
+        set(findall(fig,'Tag',sprintf('win%d',k)),'Units','normalized','Position',[.05 .71-(k-2)*.054 .30 .035]);
+        set(findall(fig,'Tag',sprintf('val%d',k)),'Units','normalized','Position',[.34 .71-(k-2)*.054 .15 .035]);
+    end
+    set(findall(fig,'Tag','win1'),'Units','normalized','Position',[.05 .81 .89 .035]);
     setappdata(fig,'quicklab_file_state',struct('folder','','names',{{}},'index',0));
     title = findall(fig,'Tag','win0');
     if isscalar(title)
         listener = addlistener(title,'String','PostSet',@(~,~) quicklab_controls(fig,'refresh'));
         setappdata(panel,'redrawListener',listener);
+    end
+    ica = findall(fig,'Tag','val11');
+    if isscalar(ica)
+        listener = addlistener(ica,'String','PostSet',@(~,~) rankLabel(fig));
+        setappdata(panel,'rankListener',listener);
     end
     quicklab_controls(fig,'refresh');
     return;
@@ -92,7 +105,7 @@ end
 
 function refresh(fig,followDataset)
 if nargin < 2, followDataset = true; end
-[~,eeg,~] = workspace;
+[alleeg,eeg,current] = workspace;
 state = getappdata(fig,'quicklab_file_state');
 if followDataset && ~isempty(eeg.filepath) && isfolder(eeg.filepath)
     state.folder = eeg.filepath;
@@ -116,18 +129,35 @@ set(findall(fig,'Tag','LoadFileList2'),'String',[{hint} state.names],'Value',sta
 set(findall(fig,'Tag','LoadUp'),'Enable',onoff(state.index>1));
 set(findall(fig,'Tag','LoadDown'),'Enable',onoff(state.index<numel(state.names)));
 set(findall(fig,'Tag','SAVEASBUTTON2'),'Enable',onoff(~isempty(eeg.data)));
-set(findall(fig,'Tag','quicklab_folder'),'String',['Folder: ' state.folder],'TooltipString',state.folder);
-label = 'Rank: no dataset';
+set(findall(fig,'Tag','SAVETEXT2'),'Enable',onoff(~isempty(eeg.data)));
+set(findall(fig,'Tag','LoadFileList2'),'Visible',onoff(~isempty(state.names)));
+set(findall(fig,'Tag','LoadUp'),'Visible',onoff(numel(state.names)>1));
+set(findall(fig,'Tag','LoadDown'),'Visible',onoff(numel(state.names)>1));
+folder = eeg.filepath; if isempty(folder), folder = 'none'; end
+set(findall(fig,'Tag','quicklab_folder'),'String',['Filepath: ' folder], ...
+    'TooltipString',eeg.filepath,'Visible',onoff(~isempty(eeg.data)));
+label = '';
 if isnumeric(eeg.data) && ~isempty(eeg.data)
+    ica = 'No'; if ~isempty(eeg.icaweights), ica = num2str(size(eeg.icaweights,1)); end
     try
         n = quicklab_data_rank(eeg.data);
-        label = sprintf('Rank: %d/%d | ICs: %d',n,size(eeg.data,1),size(eeg.icaweights,1));
+        label = sprintf('%s; Rank (%d)',ica,n);
     catch
-        label = 'Rank: unavailable (check data)';
+        label = [ica '; Rank unavailable'];
     end
 end
-set(findall(fig,'Tag','quicklab_rank'),'String',label,'TooltipString', ...
-    'Centered covariance rank estimate (EEGLAB tolerance 1e-7 uV^2); ICs = existing ICA components.');
+setappdata(fig,'quicklab_rank_label',label); rankLabel(fig);
+quicklab_menu_state(fig,alleeg,eeg,current);
+quicklab_preview(fig,eeg);
+end
+
+function rankLabel(fig)
+label = getappdata(fig,'quicklab_rank_label');
+target = findall(fig,'Tag','val11');
+if ~isempty(label) && isscalar(target) && ~isequal(get(target,'String'),label)
+    set(target,'String',label,'TooltipString', ...
+        'ICA component count; centered covariance rank of all samples (EEGLAB tolerance 1e-7 uV^2).');
+end
 end
 
 function [alleeg,eeg,current] = workspace
@@ -146,7 +176,10 @@ end
 function make(panel,style,tag,label,pos,callback)
 args = {'Parent',panel,'Style',style,'Tag',tag,'String',label,'Units','normalized', ...
     'Position',pos,'FontSize',10};
-if strcmp(style,'text'), args = [args {'HorizontalAlignment','left','BackgroundColor',get(panel,'BackgroundColor')}]; end
+if strcmp(style,'text')
+    if isgraphics(panel,'figure'), color=get(panel,'Color'); else, color=get(panel,'BackgroundColor'); end
+    args = [args {'HorizontalAlignment','left','BackgroundColor',color}];
+end
 if ~isempty(callback), args = [args {'Callback',callback}]; end
 uicontrol(args{:});
 end

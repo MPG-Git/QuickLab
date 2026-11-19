@@ -60,7 +60,7 @@ for k = 1:numel(manifest.plugins)
     assert(strcmp(registered.version,expected), ...
         'EEGLAB:VersionMetadata','Incorrect registered version for %s.',p.name);
 end
-quicklab = PLUGINLIST(strcmp({PLUGINLIST.foldername},'QuickLabMPG1.1.0'));
+quicklab = PLUGINLIST(strcmp({PLUGINLIST.foldername},'QuickLabMPG1.1.1'));
 assert(strcmp(quicklab.plugin,'QuickLabMPG'), ...
     'The lab QuickLab edition must have a distinct plugin catalog identity.');
 end
