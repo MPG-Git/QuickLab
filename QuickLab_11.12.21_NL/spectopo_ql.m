@@ -567,7 +567,8 @@ power_text = uicontrol(gcf,'Style','text','Units','Normalized','Tag', 'power_tex
 % --- Text Display for Power
 power = uicontrol(gcf,'Style','text','Units','Normalized','Tag', 'power', 'Position', [.93 .13 .05 .05],'String','power');
 % --- Save button
-save = uicontrol(gcf,'Style', 'pushbutton', 'Units','Normalized','Tag', 'save', 'Position', [.93 .08 .05 .05],'String','Save Figure','BackgroundColor',GUIBUTTONCOLOR);
+save = uicontrol(gcf,'Style', 'pushbutton', 'Units','Normalized','Tag', 'save', 'Position', [.91 .08 .09 .05],'String','Save Figure','BackgroundColor',GUIBUTTONCOLOR, ...
+    'Callback',@(src,~) quicklab_save_figure(ancestor(src,'figure'),struct('filename','spectrum.set','filepath','')));
 
 % --- Sets background color for all texts
 set(findobj(gcf,'Style','text'),'BackgroundColor',BACKCOLOR)
@@ -692,7 +693,7 @@ if ~isempty(g.weights)
                 end
                 resvar(index) = mean(resvartmp); % mean contribution for all channels
                 stdvar(index) = std(resvartmp);
-                myfprintf(g.verbose, 'Component %d percent variance accounted for: %6.2f ± %3.2f\n', ...
+                myfprintf(g.verbose, 'Component %d percent variance accounted for: %6.2f Â± %3.2f\n', ...
                         g.icacomps(index), resvar(index), stdvar(index));
             else
                 resvar(index)  = 100 - 100*exp(-(maxdatadb-compeegspecdB(index, indexfreq))/10*log(10));
@@ -823,56 +824,7 @@ end
 
 topodata = eegspecdB(:,freqidx)-nan_mean(eegspecdB(:,freqidx));
 tic
-haspar = [];
-haspar = ver('parallel');
-if ~isempty(haspar)
-    parfor f=1:length(g.freq)
-        freqs;
-        headax;
-        maplimits;
-        %AXES_FONTSIZE_L;
-        newfig(f) = figure('tag',strcat('fig',int2str(f),currentfigtag),Visible='off');
-
-        ax(f) = axes('Tag',strcat('Ax',int2str(f),currentfigtag));
-        %,'Position',get(headax(realpos(f)),'position')
-        topodata2 = topodata;
-        %axes(headax(realpos(f)));
-        
-        if ~isempty(g.plotchan) && g.plotchan ~= 0 % If 1 channel in g.plotchan
-            % if ~isempty(varargin) % if there are extra topoplot() flags
-            %	topoplot(g.plotchan,g.chanlocs,'electrodes','off', ...
-            %			 'style', 'blank', 'emarkersize1chan', 10, varargin{:});
-            % else
-            to(f) = topoplot(g.plotchan,g.chanlocs,'electrodes','off', ...
-                'style', 'blank', 'emarkersize1chan', 10);
-            % end
-            if isstruct(g.chanlocs)
-                tl(f)=title(g.chanlocs(g.plotchan).labels);
-            else
-                tl(f)=title([ 'c' int2str(g.plotchan)]);
-            end
-        else % plot all channels in g.plotchans
-            %topodata2 = eegspecdB(:,freqidx(f))-nan_mean(eegspecdB(:,freqidx(f)));
-            %topodata2 = topodata(:,f);
-            if ~isempty(varargin)
-                to(f) = topoplot(topodata2(g.mapframes,f),g.chanlocs2,'maplimits',maplimits, varargin{:});
-            else
-                to(f) = topoplot(topodata2(g.mapframes,f),g.chanlocs2,'maplimits',maplimits);
-            end
-            if f<length(g.freq)
-                tl(f)=title([num2str(freqs(freqidx(f)), '%3.1f')],'fontsize',13);
-            else
-                tl(f)=title([num2str(freqs(freqidx(f)), '%3.1f') ' Hz'],'fontsize',13);
-            end
-        end
-        hold on;
-        %set(tl,'fontsize',AXES_FONTSIZE_L);
-        axis square;
-        axis off;
-        %drawnow limitrate
-        %myfprintf(g.verbose, '.');
-    end
-else
+% MATLAB graphics handles must stay in the client process.
     for f=1:length(g.freq)
         freqs;
         headax;
@@ -919,7 +871,6 @@ else
         %drawnow limitrate
         %myfprintf(g.verbose, '.');
     end
-end
 
 for f=1:length(g.freq)
     

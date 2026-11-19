@@ -21,15 +21,46 @@ Folder navigation retains unsaved data in EEGLAB's dataset list and does not
 change MATLAB's working directory. Rank uses all samples and the maintained
 numerical calculation. The Windows bundle continues to supply BINICA.
 
-The existing QuickLab scroll, spectra, component and difference windows remain
-available through **QuickLab > Quick Plots**. Existing processing fixes are
-retained. This is not a replacement of the current core with the archived core.
+## Plot-window audit (Desktop 1.4.0)
 
-Some archived experiments are not restored automatically: the unfinished-file
-selector and progress pie inferred completion from DotLoc filename fragments;
-the separate advanced editor had additional unvalidated processing code.
-Their presence in the archive does not establish that those workflows work.
+The audit compared all 164 recovered top-level QuickLab MATLAB sources,
+active menu labels/callbacks and figure controls against the archived branch
+`b9a0ae2f233ec698843bb8d2554e8a88f3255465`. The maintained EEGLAB core stays current.
+
+| Archived area | Maintained behavior |
+| --- | --- |
+| Adv. Data Editor | Restored familiar menu entries; uses the maintained scroll engine |
+| Editor information | Channels/reference, samples/rate, epochs/events, time range, ICA/rank above traces |
+| Editor folder selector | Load Folder and Load File From This Folder; opens a second editor and retains the first window's unsaved marks |
+| Editor saving | Save File with Text and Store Marks to EEGLAB; saving asks before overwriting; storing adds a dataset |
+| Editor modes and processing | Existing channel/component switch, epoch/continuous display, interpolation/rejection, method selector, Run/Apply, Undo/Redo, Clear Marks, scale and navigation controls retained |
+| Editor menus | Scoped QuickLab file/plot actions; Figure/Display/Settings/Events controls retained |
+| Spectra | Familiar FFT(avg) action and Save Figure; export uses the plotted dataset's filename and asks where to save |
+| Component overview | Select All, Clear Values, component details, component scroll, CorrMaps, rejection list, removal and N-1 PCA retained; callbacks now use the plotted decomposition |
+| ERP overview | Familiar alias restored; enabled for epoched data with ICA; cancellation stops cleanly; selected event types are passed correctly |
+| Defaults | Edit QuickLab Defaults restored (opens the installed defaults file) |
+| Differences | Last-files and selectable-dataset comparisons remain available after two datasets are loaded |
+
+Closing an editor no longer reloads a basename from the current working folder.
+Store Marks and component changes create a new EEGLAB dataset, retaining the
+previous active dataset. Selecting another file keeps the original editor open.
+These explicit actions can therefore add several datasets to the Datasets menu.
+The archived practice of copying every EEGLAB menu into a plot was replaced by
+actions bound to that plot, preventing edits to a different active dataset.
+
+The unfinished-file selector and progress pie inferred completion from DotLoc
+filename fragments; these heuristics and unused experimental processing forks
+are not restored. The advanced editor's useful controls are incorporated above.
 Saved MATLAB `.fig` files are not opened automatically as FFT previews.
+
+The shared-leadfield REST/Infinity comparison is under **QuickLab > Quick Channel
+Edit > REST / Infinity / Average (same leadfield)**. It creates three new datasets
+without changing the input. Select scalp channels with one original reference
+and valid head-centered EEGLAB XYZ coordinates. Excluded auxiliary channels stay
+unchanged; stale ICA/source estimates are cleared. The standard three-sphere
+model projects electrode directions to the scalp and is not a subject-specific
+head model. The separate N3 batch script is not distributed; its shared-model
+approach is available through this portable function and menu.
 
 ## Try it with the supplied examples
 

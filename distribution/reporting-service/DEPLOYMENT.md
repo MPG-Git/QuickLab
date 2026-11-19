@@ -1,5 +1,14 @@
 # Hosted deployment
 
+## Desktop 1.4.0, 19 November 2026
+
+Supabase imports `9dbd96957d311017180573305662f5f13a684c43` for service,
+GitHub authorizer and diagnostic catalog. Health reports 1.4.0; 13,187 shipped
+MATLAB files are recognized. Private collector `ddb9075cace342607ad391ede1c65ca8c5e3a36a`
+passed live workflow run `44619303139` (synthetic issue #23), including delivery,
+deduplication and grouping. Existing consent and privacy limits remain in force.
+
+
 ## Desktop 1.3.1, 19 November 2026
 
 The deployed source/catalog pin is `51cd9a878920bb5a4e908e3c99bf69f629ca23b7`.

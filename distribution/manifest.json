@@ -533,16 +533,16 @@
       "version": "0.57.0"
     },
     {
-      "archive_root": "QuickLab-a75c7aa82d833258e536c464b2887ef1a93024d5/QuickLab_11.12.21_NL/",
-      "bytes": 71107060,
-      "commit": "a75c7aa82d833258e536c464b2887ef1a93024d5",
-      "folder": "QuickLabMPG1.1.1",
+      "archive_root": "QuickLab-22f659666c2d10ded1c9cd3cd192881f18d06a7c/QuickLab_11.12.21_NL/",
+      "bytes": 72979784,
+      "commit": "22f659666c2d10ded1c9cd3cd192881f18d06a7c",
+      "folder": "QuickLabMPG1.2.0",
       "name": "QuickLab",
-      "notes": "Lab edition: restored file controls, included Windows BINICA, rank-aware ICA/PCA, client-side component graphics, portable DIPFIT settings, corrected high-pass menu, synthetic ICA example.",
+      "notes": "Golden editor controls, scoped plot callbacks, ERP event selection, serial FFT graphics, and shared-model REST/Infinity practice; retains BINICA and prior fixes.",
       "observed": "0.91 plus custom unversioned copy",
-      "sha256": "22bda387c8edffa1490d26428e73ce3cc6eed97ada02055ed70038251ddd905c",
-      "url": "https://codeload.github.com/MPG-Git/QuickLab/zip/a75c7aa82d833258e536c464b2887ef1a93024d5",
-      "version": "1.1.1"
+      "sha256": "682280ccd2659498e9c1969e259cd3d90e2efcb02b2adb6fb0cf42f5548891b0",
+      "url": "https://codeload.github.com/MPG-Git/QuickLab/zip/22f659666c2d10ded1c9cd3cd192881f18d06a7c",
+      "version": "1.2.0"
     },
     {
       "archive_root": "RELAX-2.0.1/",
@@ -557,15 +557,15 @@
       "version": "2.0.1"
     },
     {
-      "archive_root": "REST1.2/",
-      "bytes": 78867,
-      "commit": "",
+      "archive_root": "REST-ab9106d127f545f711ffb157eb0fb002a02a8552/",
+      "bytes": 93411,
+      "commit": "ab9106d127f545f711ffb157eb0fb002a02a8552",
       "folder": "REST",
       "name": "REST",
-      "notes": "",
+      "notes": "Official SCCN source includes dong_getleadfield and dong_rest_refer, absent from the catalog ZIP but called by its GUI. Pinned 19 November 2026.",
       "observed": "1.2",
-      "sha256": "15897e9137e5159248b36885be12fc46d7a3ea75d2882db798b7b76ecb1675ea",
-      "url": "https://sccn.ucsd.edu/eeglab/plugins/REST1.2.zip",
+      "sha256": "f02350dc207002dbcea76414fef42e63ef05f01cec3e76bd7eb1ebc5097b93e5",
+      "url": "https://codeload.github.com/sccn/REST/zip/ab9106d127f545f711ffb157eb0fb002a02a8552",
       "version": "1.2"
     },
     {

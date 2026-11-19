@@ -1,6 +1,6 @@
 # Version audit — upstream 13 November; QuickLab 19 November 2026
 
-Desktop **1.3.1** retains **EEGLAB 2026.1.0**, the newest ZIP listed at the 13 November audit by the
+Desktop **1.4.0** retains **EEGLAB 2026.1.0**, the newest ZIP listed at the 13 November audit by the
 [official publisher](https://sccn.ucsd.edu/eeglab/download/daily/).
 At that audit, all 49 catalog-managed plugins from the 53-plugin inventory matched the
 [current stable EEGLAB catalog](https://sccn.ucsd.edu/eeglab/plugin_uploader/plugin_list_all.php).
@@ -14,7 +14,7 @@ The four separately maintained entries are:
 
 | Component | Selected source | Check |
 | --- | --- | --- |
-| QuickLab lab edition | MPG-Git/QuickLab, `a75c7aa82d833258e536c464b2887ef1a93024d5`, version 1.1.1 | This release's maintained comparison/menu code; registered as QuickLabMPG |
+| QuickLab lab edition | MPG-Git/QuickLab, `22f659666c2d10ded1c9cd3cd192881f18d06a7c`, version 1.2.0 | This release's maintained comparison/menu code; registered as QuickLabMPG |
 | NeuroLode | MPG-Git/NeuroLode, `0fc194d44330ba975346c3457da56d1fb00bce47` | Current main; hook 1.7.0 |
 | CUDAICA for Windows | CloudyDory/cudaica_win, `02aaf9c36c0b12346bccdc25eec195565634abdd` | Current upstream HEAD; 1.1; GPU execution unverified |
 | SPM | [Official MATLAB release 26.10.01](https://github.com/spm/spm/releases/tag/26.10.01) | Newest non-prerelease; replaces SPM12 r7771 |
@@ -42,3 +42,5 @@ run in a separate clean MATLAB session. Its complete M/EEG workflow has not
 been validated in this bundle. See [validation](VALIDATION.md) for test scope.
 
 The supplemental Windows BINICA runtime is pinned to official SCCN commit `ec0004fd64213ca51290eff38636237e706b38b5` (no tagged releases published). The EXE and adjacent OpenBLAS DLL were exercised on full- and reduced-rank synthetic data; user setup of `icadefs.m` is unnecessary for QuickLab.
+
+REST 1.2 now uses the complete official SCCN source at `ab9106d127f545f711ffb157eb0fb002a02a8552` (checked 19 November), including the `dong_getleadfield` and `dong_rest_refer` functions called by its GUI. The former catalog ZIP omitted these functions. REST/FieldTrip shared-leadfield reconstruction is included in Practice data.
