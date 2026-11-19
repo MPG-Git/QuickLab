@@ -81,10 +81,15 @@ delta=y-average; residual=delta-mean(delta,1);
 assert(norm(residual,'fro')<=1e-6*max(norm(x,'fro'),eps),'QuickLab:ReferenceOutput','Between-channel voltages unexpectedly changed.');
 out=eeg; out.data=double(out.data); out.data(rows,:,:)=reshape(y,numel(rows),eeg.pnts,eeg.trials);
 [out.chanlocs(rows).ref]=deal(ref); if ismember(1,rows), out.ref=ref; end
-for field={'icaact','icawinv','icasphere','icaweights','icachansind','specdata','specicaact','icasplinefile','dipfit','roi','stats'}
+for field={'icaact','icawinv','icasphere','icaweights','icachansind','specdata','specicaact','icasplinefile','dipfit','roi','stats','mybadcomp','comprej'}
     if isfield(out,field{1}), out.(field{1})=[]; end
 end
 if isfield(out.reject,'gcompreject'), out.reject.gcompreject=[]; end
+if isstruct(out.reject)
+    for field=fieldnames(out.reject)'
+        if startsWith(field{1},'ic'), out.reject.(field{1})=[]; end
+    end
+end
 if isempty(out.etc), out.etc=struct; end
 stale=intersect(fieldnames(out.etc),{'ic_classification','icaweights_beforerms','icasphere_beforerms','oldicaweights','oldicasphere','oldicachansind'});
 if ~isempty(stale), out.etc=rmfield(out.etc,stale); end

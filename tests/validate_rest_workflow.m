@@ -13,11 +13,13 @@ e.data(9,:)=123; e.nbchan=9; e.chanlocs(9)=e.chanlocs(1); e.chanlocs(9).labels='
 e.data=reshape(e.data,9,250,4); e.pnts=250; e.trials=4;
 e.xmax=(e.pnts-1)/e.srate; e.times=(0:e.pnts-1)/e.srate*1000;
 e.icaweights=eye(8); e.icasphere=eye(8); e.icawinv=eye(8); e.icachansind=1:8; e.etc.ic_classification=struct('old',true);
+e.mybadcomp=2; e.comprej=ones(1,13); e.reject.icarejmanual=true(1,4);
 before=e;
 rest=quick_rest_reference(e,'rest',1:8,model); inf=quick_rest_reference(e,'infinity',1:8,model);
 assert(isequaln(e,before) && all(rest.data(9,:,:)==123,'all'));
 assert(isequal(size(rest.data),[9 250 4]) && max(abs(rest.data(:)-inf.data(:)))<1e-6);
 assert(isempty(rest.icaweights) && ~isfield(rest.etc,'ic_classification'));
+assert(isempty(rest.mybadcomp) && isempty(rest.comprej) && isempty(rest.reject.icarejmanual));
 assert(strcmp(rest.ref,'REST') && strcmp(rest.chanlocs(9).ref,e.chanlocs(9).ref));
 bad=e; bad.data(1)=NaN; fails(@() quick_rest_reference(bad,'rest',1:8,model),'QuickLab:NonfiniteData');
 bad=e; bad.chanlocs(2).ref='different'; fails(@() quick_rest_reference(bad,'rest',1:8,model),'QuickLab:MixedReference');
