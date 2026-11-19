@@ -1,5 +1,27 @@
 # Validation of the EEGLAB replacement build
 
+## Desktop 1.3.1 layout checks, 19 November 2026
+
+The May 2024 archive's main-window code and recovered QuickLab Git history were
+used as layout references. The maintained core, ICA/BINICA and comparison fixes
+are retained. No recordings or local configuration from the archive are shipped.
+
+MATLAB R2023b Update 3: all 29 comparison/setup/workflow regression tests passed.
+The real GUI callback test passed zero/one/two-dataset menu states, ICA gating,
+the familiar save/suffix/folder order, rank display, resize/redraw, matching FFT
+preview lifecycle, saving/reloading, cancellation, empty folders, navigation
+boundaries and preservation of unsaved data in ALLEEG. The QuickLab scroll
+save/mode/mark controls and the BINICA/ICLabel/component display also passed.
+
+Native screenshot inspection was blocked by the computer-use tool's MATLAB
+window ownership error; these are programmatic GUI checks, not a claim of
+pixel-for-pixel visual verification. The generated synthetic FFT picture was
+visually inspected. See `docs/GOLDEN_LAYOUT.md` for preserved and excluded items.
+
+The 16 updater, 18 Windows reporting and 18 Node/PostgreSQL/OIDC checks passed.
+The exact release package and live delivery verification are recorded separately
+in `distribution/releases/1.3.1.md` after release testing.
+
 ## Desktop 1.3.0 source checks, 13 November 2026
 
 MATLAB R2023b Update 3 on Windows passed 29 QuickLab tests, including the

@@ -1,18 +1,20 @@
-# Version audit — 13 November 2026
+# Version audit — upstream 13 November; QuickLab 19 November 2026
 
-Desktop **1.3.0** uses **EEGLAB 2026.1.0**, the newest ZIP listed by the
+Desktop **1.3.1** retains **EEGLAB 2026.1.0**, the newest ZIP listed at the 13 November audit by the
 [official publisher](https://sccn.ucsd.edu/eeglab/download/daily/).
-All 49 catalog-managed plugins from the 53-plugin inventory match the
+At that audit, all 49 catalog-managed plugins from the 53-plugin inventory matched the
 [current stable EEGLAB catalog](https://sccn.ucsd.edu/eeglab/plugin_uploader/plugin_list_all.php).
-The additional bundled EEG-BIDS 10.5 also matches the catalog.
-FieldTrip-lite 250523 and Fileio 260210 are the current EEGLAB catalog packages;
+The additional bundled EEG-BIDS 10.5 also matched the catalog.
+FieldTrip-lite 250523 and Fileio 260210 were the EEGLAB catalog packages;
 development/nightly snapshots of the full FieldTrip toolbox are not substituted.
+The 19 November update restores the lab's familiar QuickLab layout; it does not
+change those third-party pins or claim a new audit of all upstream releases.
 
 The four separately maintained entries are:
 
 | Component | Selected source | Check |
 | --- | --- | --- |
-| QuickLab lab edition | MPG-Git/QuickLab, `acc856281a15865e587987641c54aa82d2ac68ec`, version 1.1.0 | This release's maintained comparison/menu code; registered as QuickLabMPG |
+| QuickLab lab edition | MPG-Git/QuickLab, `a75c7aa82d833258e536c464b2887ef1a93024d5`, version 1.1.1 | This release's maintained comparison/menu code; registered as QuickLabMPG |
 | NeuroLode | MPG-Git/NeuroLode, `0fc194d44330ba975346c3457da56d1fb00bce47` | Current main; hook 1.7.0 |
 | CUDAICA for Windows | CloudyDory/cudaica_win, `02aaf9c36c0b12346bccdc25eec195565634abdd` | Current upstream HEAD; 1.1; GPU execution unverified |
 | SPM | [Official MATLAB release 26.10.01](https://github.com/spm/spm/releases/tag/26.10.01) | Newest non-prerelease; replaces SPM12 r7771 |
