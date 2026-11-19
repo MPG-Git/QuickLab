@@ -48,7 +48,7 @@ All 53 unique names from the supplied startup log are represented. Duplicate Qui
 | PrepPipeline | 0.56.0 | [0.57.0](https://sccn.ucsd.edu/eeglab/plugins/PrepPipeline0.57.0.zip) |
 | QuickLab lab edition | 0.91 plus custom copy | [1.1.1](https://codeload.github.com/MPG-Git/QuickLab/zip/a75c7aa82d833258e536c464b2887ef1a93024d5) |
 | RELAX | 2.0.1 | [2.0.1](https://sccn.ucsd.edu/eeglab/plugins/RELAX2.0.1.zip) |
-| REST | 1.2 | [1.2](https://sccn.ucsd.edu/eeglab/plugins/REST1.2.zip) |
+| REST | 1.2 | [1.2, complete official source](https://github.com/sccn/REST/tree/ab9106d127f545f711ffb157eb0fb002a02a8552) |
 | REST_fieldtrip | 1.0 | [1.0](https://sccn.ucsd.edu/eeglab/plugins/REST_fieldtrip1.0.zip) |
 | SASICA | unspecified | [1.3.8](https://sccn.ucsd.edu/eeglab/plugins/SASICA1.3.8.zip) |
 | spm | unspecified | [26.10.01](https://github.com/spm/spm/releases/download/26.10.01/spm_26.10.01.zip) |

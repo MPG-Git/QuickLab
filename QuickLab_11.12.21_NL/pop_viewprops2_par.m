@@ -433,6 +433,7 @@ commandSelAll = {@selectall,1};
 selectAll = uicontrol(gcf, 'Style', 'pushbutton', 'backgroundcolor', [0.9 0.7 0.7], 'string', 'Select All', 'Units','Normalized','Position',[10 -10 10 6].*s+q, 'callback', commandSelAll');
 
 %% com for eegh
+if ~typecomp, quicklab_component_controls(fig,'attach',EEG); end
 
 com = sprintf('pop_viewprops2( %s, %d, %s, %s, %s, %d, ''%s'' )', ...
     inputname(1), typecomp, hlp_tostring(chanorcomp), hlp_tostring(spec_opt), ...

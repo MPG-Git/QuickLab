@@ -74,9 +74,14 @@ end
 %tic
 figure; pop_spectopo_ql(EEG, 1, [EEG.xmin*1000  EEG.xmax*1000], 'EEG' , 'freq', [topo], 'freqrange',[low high],'winsize',maxWindow,'electrodes','off');
 %toc
-savecommand = ['saveas(gcf,[EEG.filename(1:end-4),''FFT.jpg'']);'];
+sourceEEG=EEG; sourceFigure=gcf;
+savecommand = @(~,~) quicklab_save_figure(sourceFigure,sourceEEG);
 
-save = uicontrol(gcf, 'Style', 'pushbutton', 'Units','Normalized','Tag', 'save', 'Position', [.91 .08 .09 .05],'String','Save Figure','Callback',savecommand);
+save = findall(sourceFigure,'Tag','save');
+if isempty(save)
+    save=uicontrol(sourceFigure,'Style','pushbutton','Units','normalized','Tag','save');
+end
+set(save,'Position',[.91 .08 .09 .05],'String','Save Figure','Callback',savecommand);
 
 
 

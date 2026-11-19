@@ -209,7 +209,7 @@ outvar1 = 0;
 %% Collects component or channel plot, continuous or epoched plot
 if isstruct(EEG)
     EEG.varargin = varargin;
-    if ~isfield(EEG,'plotIc')
+    if ~isfield(EEG,'plotchannels')
         EEG.plotchannels = 1;
     end
     if ~isfield(EEG,'plotEp')
@@ -262,11 +262,7 @@ end
 
 if ~ischar(data) % If NOT a 'noui' call or a callback from uicontrols
 
-    %% NEW ADDED FEATURE, CLOSES OTHER EEGPLOT_W3
-    otherfigs = findobj('tag','eegplot_w3');
-    if ~isempty (otherfigs)
-        close(otherfigs);
-    end
+    % Keep other editor windows and their unsaved marks open.
 
    try
        options = varargin;
@@ -600,7 +596,7 @@ if ~ischar(data) % If NOT a 'noui' call or a callback from uicontrols
   
   % Plot title if provided
   if ~isempty(g.plottitle)
-      h = findobj('tag', 'eegplottitle'); 
+      h = findobj(gcf,'tag', 'eegplottitle');
       if ~isempty(h)
           set(h, 'string',g.plottitle);
       else
@@ -744,7 +740,7 @@ if ~ischar(data) % If NOT a 'noui' call or a callback from uicontrols
 
 %% Channel rejection callbacks
 % get channels for partial interpolation
-chaninterp = ['EEG.myVariables{1} = get(findobj(gcf, ''Tag'', ''Channel''),''string'');']; 
+chaninterp = ['EEG.myVariables{1} = get(findobj(gcf, ''Tag'', ''Channel''),''string'');'];
 % select plot difference
 plotdiffcom = ['EEG.myVariables{2} = get(findobj(gcf, ''Tag'', ''datadiff''),''Value'');'];
 % get channels for complete interpolation
@@ -1434,10 +1430,7 @@ u(22) = uicontrol('Parent',figh, ...
   if isempty(g.command) tmpcom = 'fprintf(''Rejections saved in variable TMPREJ\n'');';   
   else tmpcom = g.command;
   end
-  closecommand = ['g = get(gcbf,''userdata''); EEG = g.EEG; if g.children, delete(g.children); end'...
-                 'delete(gcbf);' ...
-                 'eval(get(findobj(''tag'',''LoadDir''),''Callback''));' ...
-                 'eval(get(findobj(''tag'',''LoadFileList''),''Callback''));'];
+  closecommand = 'quicklab_editor(gcbf,''close'');';
 
   acceptcommand = [ 'g = get(gcbf, ''userdata'');' ... 
                     'TMPREJ = g.winrej;' ...
@@ -1462,7 +1455,6 @@ u(22) = uicontrol('Parent',figh, ...
 	'string',fastif(isempty(g.command),'CLOSE', 'CLOSE'), 'callback', ...
 		[	'g = get(gcbf, ''userdata'');' ...
             'EEG = g.EEG;' ...
-            'EEG = pop_loadset(EEG.filename);' ...
             'if g.children, delete(g.children); end;' ...
 			'close(gcbf);'] );
 
@@ -1473,7 +1465,7 @@ else
     if g.EEG.plotchannels == 1
         tmpsavecom = g.savecommand;
     else
-        tmpsavecom = g.savecommand_pc;
+        tmpsavecom = g.savecommand2;
     end
 end
   savecommand = [ 'g = get(gcbf, ''userdata'');' ...  
@@ -1897,6 +1889,7 @@ end
   set(h, 'backgroundcolor', cmodecolor);
   
   update_trial_rejections(g)
+  quicklab_editor(figh);
   
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % End Main Function
@@ -1912,7 +1905,7 @@ else
     close(gcf);
     %EEG = p1;
     
-    fig = findobj('tag','eegplot_w3');
+    fig = gcf;
 %     g = get(fig,'UserData'); 
 %     if size(fig,1) > 2
          g = get(gcf,'UserData');
@@ -1941,43 +1934,18 @@ else
 
       %mouse_motion(varargin)
       
-      figh = findobj('tag','eegplot_w3');
+      figh = gcf;
       ax0 = findobj('tag','backeeg','parent',figh);
       ax1 = findobj('tag','eegaxis','parent',figh);
 
-      A = findobj('Style','text');
-      B = findobj('Tag','Eelec');
-      C = findobj('Tag','Evalue');
+      A = findobj(gcf,'Style','text');
+      B = findobj(gcf,'Tag','Eelec');
+      C = findobj(gcf,'Tag','Evalue');
 
       mouse_motion([],[],figh,ax0,ax1,B,C,A)
 
   case 'SAVE'
-      %fig = findobj('tag','eegplot_w3');
-      g = get(gcf,'UserData'); 
-      EEG = g.EEG; 
-       if EEG.plotchannels == 1
-           EEG.chanrej = g.winrej;
-           EEG.comprej = g.winrej_pc;
-           try EEG.mybadchan = find([g.eloc_file.badchan]);catch; end
-           try EEG.mybadcomp = find([g.eloc_file_pc.badchan]); EEG.gcompreject = find([g.eloc_file.badchan]);catch; end
-       else
-           EEG.chanrej = g.winrej_ch;
-           EEG.comprej = g.winrej;
-           try EEG.mybadchan = find([g.eloc_file_ch.badchan]);catch; end
-           try EEG.mybadcomp = find([g.eloc_file.badchan]); EEG.gcompreject = find([g.eloc_file.badchan]); catch; end
-       end
-      
-      suffix = get(findobj(gcf,'tag','SaveNowText'),'string');
-      EEG.filename(1:end-4)
-      [EEG] = pop_saveset(EEG, 'filename', [strcat( EEG.filename(1:end-4),suffix,'.set')],'filepath',EEG.filepath);
-      set(findobj(gcf,'tag','SaveNowText'),'String','');
-
-      eval(get(findobj(gcf,'tag','SaveButton'),'callback'))
-      [g.EEG] = eeg_store([], g.EEG);
-      %EEG = pop_loadset(EEG.filename);
-      g.EEG = EEG; %save set ADDED BY UGO
-      %eeglab redraw;
-      set(findobj('tag','eegplot_w3'),'UserData',g);
+      quicklab_editor(gcf,'save');
 
   case 'METHODS'
     g = get(gcf,'UserData');
@@ -1989,6 +1957,7 @@ else
         normalize_chan([],[],gcf);
     end
     g = APPLY(g);
+    quicklab_editor(gcf,'refresh');
     
   case 'SWITCH'
     g = get(gcf,'UserData');
@@ -2102,7 +2071,7 @@ else
     g = get(gcf,'UserData');
     EEG = g.EEG;
     epoch = abs(EEG.xmin - EEG.xmax);
-    dis = findobj('tag', 'Display');
+    dis = findobj(gcf,'tag', 'Display');
     
     if g.trialstag == -1
         
@@ -2222,7 +2191,7 @@ end
    fig = gcf;
    g = get(gcf,'UserData');
    
-   g.dispchans = str2num(get(findobj('tag','NumChan'),'String'));
+   g.dispchans = str2num(get(findobj(gcf,'tag','NumChan'),'String'));
 
    if isempty(g.dispchans) || g.dispchans < 0 || g.dispchans > g.chans
        g.dispchans = g.chans;
@@ -2292,7 +2261,7 @@ end
   
   case 'title'
     % Get new title
-	h = findobj('tag', 'eegplottitle');
+	h = findobj(gcf,'tag', 'eegplottitle');
 	
 	if ~isempty(h)
 		result       = inputdlg2( { 'New title:' }, 'Change title', 1,  { get(h(1), 'string') });
@@ -2369,7 +2338,7 @@ end
       if ~isempty(varargin)
           eegplot_w3( varargin{:} ); fig = gcf;
       else 
-          fig = findobj('tag', 'eegplot_w3');
+          fig = gcf;
       end
       set(fig, 'menubar', 'figure');
       
@@ -2389,8 +2358,8 @@ end
  
    case 'zoom' % if zoom
       fig = varargin{1};
-      ax1 = findobj('tag','eegaxis','parent',fig); 
-      ax2 = findobj('tag','backeeg','parent',fig); 
+      ax1 = findobj('tag','eegaxis','parent',fig);
+      ax2 = findobj('tag','backeeg','parent',fig);
       tmpxlim  = get(ax1, 'xlim');
       tmpylim  = get(ax1, 'ylim');
       tmpxlim2 = get(ax2, 'xlim');
@@ -2499,7 +2468,7 @@ end
 %     if ~isstruct(g.eloc_file) || ~isfield(g.eloc_file, 'theta') || isempty( [ g.eloc_file.theta ])
 %         return;
 %     end;
-%     ax1 = findobj('tag','backeeg','parent',fig); 
+%     ax1 = findobj('tag','backeeg','parent',fig);
 %     tmppos = get(ax1, 'currentpoint');
 %     ax1 = findobj('tag','eegaxis','parent',fig); % axes handle
 %     % plot vertical line
@@ -2516,7 +2485,7 @@ end
     
     %STOPPED HERE
     
-    %axes = get(findobj('tag','Topoplot'));
+    %axes = get(findobj(gcf,'tag','Topoplot'));
     %figure; topoplot(data(:,datapos), g.eloc_file);
 %     if g.trialstag == -1
 %          latsec = (datapos-1)/g.srate;
@@ -2609,7 +2578,7 @@ function draw_data(varargin)
         figh = varargin{3};
         %figure(figh);
     else
-        figh = findobj('tag','eegplot_w3');
+        figh = gcf;
     end
     if strcmp(get(figh,'tag'),'dialog')
         figh = get(figh,'UserData');
@@ -4219,8 +4188,8 @@ EEG = g.EEG;
         datapos = min(datapos, g.frames);
         
         colormap("default")
-        ax_pic = findobj('tag','topo');
-        ax_matrix = findobj('tag','figure');
+        ax_pic = findobj(gcf,'tag','topo');
+        ax_matrix = findobj(gcf,'tag','figure');
 
 %         if isempty(ax_pic)
 %             ax_pic = axes('Parent', gcf, 'position',g.matrixpos,'units','normalized','tag','topo','XTickLabel',{[]},'YTickLabel',{[]},Color=[.93 .96 1]);
@@ -4303,7 +4272,7 @@ function plot_topoplot_old(fig)
     if ~isstruct(g.eloc_file) || ~isfield(g.eloc_file, 'theta') || isempty( [ g.eloc_file.theta ])
         return;
     end
-    ax1 = findobj('tag','backeeg','parent',fig); 
+    ax1 = findobj('tag','backeeg','parent',fig);
     tmppos = get(ax1, 'currentpoint');
     ax1 = findobj('tag','eegaxis','parent',fig); % axes handle
     % plot vertical line
@@ -4338,7 +4307,7 @@ function plot_topoplot_old(fig)
         set(fig,'Color',BackColor);
     end
     else
-%     ax1 = findobj('tag','backeeg','parent',fig); 
+%     ax1 = findobj('tag','backeeg','parent',fig);
 %     tmppos = get(ax1, 'currentpoint');
     ax1 = findobj('tag','eegaxis','parent',fig); % axes handle
     tmppos = get(ax1, 'currentpoint');
@@ -5410,8 +5379,8 @@ EEG = g.EEG;
 First = 0;
 
 % --- make axis for plot
-ax_pic_topo = findobj('tag','topo');
-ax_pic = findobj('tag','matrix_axis');
+ax_pic_topo = findobj(gcf,'tag','topo');
+ax_pic = findobj(gcf,'tag','matrix_axis');
 
 if ~isempty(ax_pic_topo)
     delete(ax_pic_topo);
@@ -5537,7 +5506,7 @@ end
         set(findobj(gcf,'tag','headmap'),'String','Data Matrix');
     else
         set(findobj(gcf,'tag','headmap'),'String','Data Matrix');
-        matrix_pic = findobj('tag','matrix');
+        matrix_pic = findobj(gcf,'tag','matrix');
         set(matrix_pic,'CData',plot_matrix);
         %repeat coloring and axes to avoid issues.
 %         mymap = [.5 .5 .8; 0 0 0; 1 1 0; 0 1 0; 1 0 0]; % color map of matrix
@@ -5570,7 +5539,7 @@ end
 %   
 %   % Plot title if provided
 %   if ~isempty(g.plottitle)
-%       h = findobj('tag', 'eegplottitle'); 
+%       h = findobj(gcf,'tag', 'eegplottitle');
 %       if ~isempty(h)
 %           set(h, 'string',g.plottitle);
 %       else
@@ -5794,7 +5763,7 @@ function g = THINKING(g,stop)
 
 %figh = gcf;
 
-fig = findobj('tag','eegplot_w3');
+fig = gcf;
 
 if nargin < 1
     try g = get(fig,'UserData'); catch, return; end

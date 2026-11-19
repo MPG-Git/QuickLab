@@ -256,7 +256,7 @@ EEG.plotchannels = plotchannels;
 if isEpoched == 3
     title = ['Frequencies in '];
 else
-    if ~plotchannels
+    if plotchannels==1
         title = ['Channels in '];
     else
         title = ['Components in '];
@@ -264,8 +264,8 @@ else
 end
 
 %% --- run eegplot_w2!!
-    eegplot_w3( EEG, 'srate', EEG.srate, 'title', [ title 'QuickLab Data Editor! -- eegplot_w2(): ' EEG.filename], ...
+    eegplot_w3( EEG, 'srate', EEG.srate, 'title', [ title 'QuickLab Data Editor! -- eegplot_w3(): ' EEG.filename], ...
              'limits', [EEG.xmin EEG.xmax]*1000 , 'command', command,'savecommand',savecommand, 'command2', command_pc,'savecommand2',savecommand_pc, eegplotoptions{:}, varargin{:});
 
-com = [ com sprintf('pop_eegplot_w2( %s, %d, %d, %d);', inputname(1), plotchannels, superpose, reject) ];
+com = [ com sprintf('pop_eegplot_w3( %s, %d, %d, %d);', inputname(1), plotchannels, superpose, reject) ];
 return;

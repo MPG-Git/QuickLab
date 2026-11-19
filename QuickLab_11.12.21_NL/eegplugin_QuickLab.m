@@ -1,4 +1,4 @@
-% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.1.1.
+% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.2.0.
 %                        QuickLab is a compilation of modified EEGLAB functions
 %                        for experienced users that wish to speed up manual
 %                        process, made by Ugo Bruzadin Nunes in
@@ -24,9 +24,9 @@
 function vers = eegplugin_QuickLab(fig, try_strings, catch_strings)
 
 % EEGLAB parses a textual version. A numeric value is displayed as v?.
-% Install in QuickLabMPG1.1.1 to distinguish this maintained fork from the
+% Install in QuickLabMPG1.2.0 to distinguish this maintained fork from the
 % historical QuickLab 0.91 catalog package. The menu remains "QuickLab".
-vers = '1.1.1';
+vers = '1.2.0';
 if nargin < 1 || isempty(fig), return; end
 % Repeated discovery must not create a second copy of this build's menu.
 % Duplicate installations still need to be removed from the MATLAB path.
@@ -41,10 +41,19 @@ uimenu(supermenu,'label','Check QuickLab setup','callback', ...
 % --- Call QuickLab DEFS
 
 QuickLabDefs;
+uimenu(supermenu,'Label','Edit QuickLab Defaults','Callback',@(~,~) edit(which('QuickLabDefs')));
 
 com = '';
 % --- first submenu: Quick plots
 plotmenu = uimenu (supermenu, 'label', 'Quick Plots');
+uimenu(supermenu,'Label','Adv. Data Editor','Callback','pop_eegplot_w3(EEG,1,2,1,1);');
+uimenu(plotmenu,'Label','Adv. Data Editor','Callback','pop_eegplot_w3(EEG,1,2,1,1);');
+corePlot=findall(fig,'Type','uimenu','Label','Plot');
+if isscalar(corePlot)
+    delete(findall(corePlot,'Tag','quicklab_core_editor'));
+    uimenu(corePlot,'Label','Adv. Data Editor','Tag','quicklab_core_editor', ...
+        'Callback','pop_eegplot_w3(EEG,1,2,1,1);');
+end
 
 uimenu( plotmenu, 'label', 'Channel & Component Scroll++ for Interpolation', 'callback', ...
     ['com = pop_eegplot_w3(EEG, 1, 2, 1, 1);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);']);
@@ -70,6 +79,8 @@ uimenu( plotmenu, 'label', 'Quick Plot Channel Spectra - AVG ref', 'callback', .
     ['[~, com] = quick_spectra(EEG,40,2,''AVG'');[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);']);
 
 othermenu = uimenu (plotmenu, 'label', 'Other');
+uimenu(othermenu,'Label','Quick ERP Viewprops+ plot','Callback', ...
+    'pop_viewprops_erp(EEG,0,1:size(EEG.icawinv,2),{''freqrange'',[2 55]});');
 
 uimenu( othermenu, 'label', 'Select Channels Scroll+++++ for Interpolation', 'callback', ...
     ['com = pop_eegplot_w2_list(EEG, 1, 2, 1, 1);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);']);
@@ -204,6 +215,8 @@ uimenu (bssmenu, 'label', 'Exp PAR BSS full file', 'callback', ...
 
 % --- third submenu: Quick channel edits
 channelmenu = uimenu (supermenu, 'label', 'Quick Channel Edit');
+uimenu(channelmenu,'Label','REST / Infinity / Average (same leadfield)', ...
+    'Callback','quicklab_reference_compare(EEG);');
 
 uimenu( channelmenu, 'label', 'Quick Re-reference AVG', 'callback', ...
     ['[EEG,com] = quick_reref(EEG);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);

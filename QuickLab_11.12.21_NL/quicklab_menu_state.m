@@ -8,7 +8,7 @@ one=isstruct(eeg) && isscalar(eeg) && isfield(eeg,'data') && ~isempty(eeg.data) 
 ica=one && ~isempty(eeg.icaweights) && ~isempty(eeg.icasphere);
 count=0;
 if isstruct(alleeg) && isfield(alleeg,'data'), count=sum(arrayfun(@(x)~isempty(x.data),alleeg)); end
-items=findall(menu,'Type','uimenu');
+items=[findall(menu,'Type','uimenu'); findall(fig,'Tag','quicklab_core_editor')];
 for k=1:numel(items)
     if ~isempty(get(items(k),'Children')), continue; end
     callback=get(items(k),'Callback'); enabled=true;
@@ -18,6 +18,8 @@ for k=1:numel(items)
         if contains(callback,'plotDifference(')
             enabled=count>=2;
             set(items(k),'Visible',flag(enabled));
+        elseif contains(callback,'pop_viewprops_erp(')
+            enabled=ica && eeg.trials>1;
         elseif any(contains(callback,{'quick_IClabel(', 'pop_viewprops_', 'print_ICA(', ...
                 'print_RejComponents(', 'save_corrmaps(', 'quick_corrmap(', 'quick_dipfit('})) ...
                 && ~contains(callback,'quick_PCA(')

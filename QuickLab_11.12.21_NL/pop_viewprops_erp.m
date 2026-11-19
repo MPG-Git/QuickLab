@@ -44,13 +44,27 @@
 
 function [com] = pop_viewprops_erp( EEG, typecomp, chanorcomp, spec_opt, erp_opt, scroll_event, classifier_name, fig, erpcom)
 
-projchan = [];
-
-[projchan chanliststr] = pop_chansel( { EEG.chanlocs.labels } );
-
-tmpevent = EEG.event;
-
-[tmps,tmpstr] = pop_chansel(unique({ tmpevent.type }));
+com='';
+if nargin<1, help pop_viewprops_erp; return; end
+assert(EEG.trials>1,'QuickLab:ERPRequiresEpochs','Load epoched data before opening ERP Viewprops.');
+% Optional selections support reproducible calls; normal menu use keeps the
+% familiar channel/event selectors. Cancellation must not continue plotting.
+if nargin>=9 && isstruct(erpcom)
+    projchan=erpcom.channels; eventtypes=erpcom.eventTypes;
+else
+    [projchan,~]=pop_chansel({EEG.chanlocs.labels});
+    if isempty(projchan), return; end
+    eventtypes=[];
+    if ~isempty(EEG.event)
+        available=unique(string({EEG.event.type}));
+        [selected,~]=pop_chansel(cellstr(available));
+        if isempty(selected), return; end
+        eventtypes=cellstr(available(selected));
+    end
+end
+assert(isempty(projchan) || all(projchan>=1 & projchan<=EEG.nbchan & projchan==fix(projchan)), ...
+    'QuickLab:ERPChannels','Invalid projection channels.');
+sortingfield=''; if ~isempty(eventtypes), sortingfield='latency'; end
 
 %'typetxt',type,'sortingeventfield','type'
 
@@ -155,7 +169,7 @@ end;
 % -----------------
 column = ceil(sqrt( length(chanorcomp) ))+2;
 rows = ceil(length(chanorcomp)/column);
-if ~exist('fig','var')
+if ~exist('fig','var') || isempty(fig)
     figure('name', [ 'View ' fastif(typecomp,'channels','components') ' properties - pop_viewprops_erp() (dataset: ' EEG.filename ')'], 'tag', currentfigtag, ...
         'numbertitle', 'off', 'color', BACKCOLOR);
     set(gcf,'MenuBar', 'none');
@@ -190,7 +204,7 @@ end;
 count = 1;
 tic
 for ri = chanorcomp
-    if exist('fig','var')
+    if exist('fig','var') && ~isempty(fig)
         button = findobj('parent', fig, 'tag', ['comp' num2str(ri)]);
         if isempty(button)
             error( 'pop_viewprops_erp(): figure does not contain the component button');
@@ -213,16 +227,16 @@ for ri = chanorcomp
         ha = axes('Units','Normalized', 'Position',[X Y sizewx sizewy-.5].*s+q,'Tag',strcat('H',int2str(ri)));
         
         if typecomp
-            to = pop_erpimage_ql(EEG,0, [ri],[[projchan]],'',10,1,{'type'},tmps,'','yerplabel','erp','on','cbar','off'); %,'topo', { EEG.icawinv(:,[ri]) EEG.chanlocs EEG.chaninfo } );
+            to = pop_erpimage_ql(EEG,1,ri,projchan,'',min(10,EEG.trials-1),1,eventtypes,[],sortingfield,'erp','on','cbar','off');
 %             to = topoplot( ri, EEG.chanlocs, 'chaninfo', EEG.chaninfo, ...
 %                 'electrodes','off', 'style', 'blank', 'emarkersize1chan', 12);
         else
             if plotelec
-                to = pop_erpimage_ql(EEG,0, [ri],[[projchan]],'',10,1,{'type'},tmps,'' ,'yerplabel','','erp','on','cbar','off'); %,'topo', { EEG.icawinv(:,[ri]) EEG.chanlocs EEG.chaninfo } );
+                to = pop_erpimage_ql(EEG,0,ri,projchan,'',min(10,EEG.trials-1),1,eventtypes,[],sortingfield,'erp','on','cbar','off');
 %                 to = topoplot( EEG.icawinv(:,ri), EEG.chanlocs, 'verbose', ...
 %                     'off', 'style' , 'fill', 'chaninfo', EEG.chaninfo, 'numcontour', 8);
             else
-                to = pop_erpimage_ql(EEG,0, [ri],[[projchan]],'',10,1,{'type'},tmps,'' ,'yerplabel','','erp','on','cbar','off'); %,'topo', { EEG.icawinv(:,[ri]) EEG.chanlocs EEG.chaninfo } );
+                to = pop_erpimage_ql(EEG,0,ri,projchan,'',min(10,EEG.trials-1),1,eventtypes,[],sortingfield,'erp','on','cbar','off');
 %                 to = topoplot( EEG.icawinv(:,ri), EEG.chanlocs, 'verbose', ...
 %                     'off', 'style' , 'fill','electrodes','off', 'chaninfo', EEG.chaninfo, 'numcontour', 8);
             end;
@@ -394,6 +408,7 @@ commandReject = [ 'tmpstatus = get( findobj(''parent'', gcf, ''Style'', ''checkb
  ok  = uicontrol(gcf, 'Style', 'pushbutton', 'string', 'Add Comps to Rej list', 'backgroundcolor', GUIBUTTONCOLOR, 'Units','Normalized', 'Position',[95 -10 15 6].*s+q);
  set( ok, 'callback', commandSelect);
  
+if ~typecomp, quicklab_component_controls(gcf,'attach',EEG); end
 com = sprintf('pop_viewprops2( %s, %d, %s, %s, %s, %d, ''%s'' )', ...
     inputname(1), typecomp, hlp_tostring(chanorcomp), hlp_tostring(spec_opt), ...
     hlp_tostring(erp_opt), scroll_event, classifier_name);

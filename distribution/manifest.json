@@ -557,15 +557,15 @@
       "version": "2.0.1"
     },
     {
-      "archive_root": "REST1.2/",
-      "bytes": 78867,
-      "commit": "",
+      "archive_root": "REST-ab9106d127f545f711ffb157eb0fb002a02a8552/",
+      "bytes": 93411,
+      "commit": "ab9106d127f545f711ffb157eb0fb002a02a8552",
       "folder": "REST",
       "name": "REST",
-      "notes": "",
+      "notes": "Official SCCN source includes dong_getleadfield and dong_rest_refer, absent from the catalog ZIP but called by its GUI. Pinned 19 November 2026.",
       "observed": "1.2",
-      "sha256": "15897e9137e5159248b36885be12fc46d7a3ea75d2882db798b7b76ecb1675ea",
-      "url": "https://sccn.ucsd.edu/eeglab/plugins/REST1.2.zip",
+      "sha256": "f02350dc207002dbcea76414fef42e63ef05f01cec3e76bd7eb1ebc5097b93e5",
+      "url": "https://codeload.github.com/sccn/REST/zip/ab9106d127f545f711ffb157eb0fb002a02a8552",
       "version": "1.2"
     },
     {

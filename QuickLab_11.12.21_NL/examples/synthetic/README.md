@@ -79,6 +79,28 @@ item or scientific validity for a particular study. Reference plots may render
 differently with another operating system or graphics version.
 # ICA and folder practice
 
+## Actual REST / FieldTrip reconstruction
+
+The desktop **Practice data** button also runs `run_rest_demo`. From MATLAB,
+with the lab desktop distribution initialized, run `run_rest_demo('new_folder')`
+after adding this examples folder to the path. This requires REST, REST_fieldtrip,
+DIPFIT and FieldTrip. The standalone QuickLab plugin does not bundle those dependencies.
+
+This separate example generates eight synthetic scalp channels from the REST
+three-sphere/3,000-dipole forward model. Native REST and FieldTrip Infinity run
+independently on exactly the same leadfield and input samples. Both must recover
+the known potentials and agree within 1e-6 microvolts; Infinity must differ from
+Average. It writes four `.set` datasets, `rest_metrics.csv`, `rest_comparison.png`
+and `PASS.txt`. Bundled reference files are in `rest_example/`. Small floating-point
+differences are expected; use the tolerances rather than exact file equality.
+
+For your data, use **QuickLab > Quick Channel Edit > REST / Infinity / Average
+(same leadfield)**. It asks which scalp channels to include and adds three
+datasets; it never saves over your input. This provides the portable shared-model
+workflow from the separate MATLAB REST/Infinity work, not its N3-specific paths
+or batch configuration. The forward model is an assumption, not proof that
+estimated infinity potentials are the true potentials in a particular recording.
+
 `data/synthetic_rank3.set` is an additional, wholly synthetic four-channel
 Average-referenced dataset with known rank three. Load it using the bottom
 **Load Folder** button, choose **QuickLab > Quick PCA > ICA**, and expect three
