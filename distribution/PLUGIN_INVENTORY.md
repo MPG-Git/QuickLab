@@ -46,7 +46,7 @@ All 53 unique names from the supplied startup log are represented. Duplicate Qui
 | PICARD | unspecified | [2.0](https://sccn.ucsd.edu/eeglab/plugins/PICARD2.0.zip) |
 | postAmicaUtility | 2.1 | [2.1](https://sccn.ucsd.edu/eeglab/plugins/postAmicaUtility2.1.zip) |
 | PrepPipeline | 0.56.0 | [0.57.0](https://sccn.ucsd.edu/eeglab/plugins/PrepPipeline0.57.0.zip) |
-| QuickLab lab edition | 0.91 plus custom copy | [1.1.1](https://codeload.github.com/MPG-Git/QuickLab/zip/a75c7aa82d833258e536c464b2887ef1a93024d5) |
+| QuickLab lab edition | 0.91 plus custom copy | [1.2.0](https://codeload.github.com/MPG-Git/QuickLab/zip/22f659666c2d10ded1c9cd3cd192881f18d06a7c) |
 | RELAX | 2.0.1 | [2.0.1](https://sccn.ucsd.edu/eeglab/plugins/RELAX2.0.1.zip) |
 | REST | 1.2 | [1.2, complete official source](https://github.com/sccn/REST/tree/ab9106d127f545f711ffb157eb0fb002a02a8552) |
 | REST_fieldtrip | 1.0 | [1.0](https://sccn.ucsd.edu/eeglab/plugins/REST_fieldtrip1.0.zip) |

@@ -14,7 +14,7 @@ The four separately maintained entries are:
 
 | Component | Selected source | Check |
 | --- | --- | --- |
-| QuickLab lab edition | MPG-Git/QuickLab, `a75c7aa82d833258e536c464b2887ef1a93024d5`, version 1.2.0 | This release's maintained comparison/menu code; registered as QuickLabMPG |
+| QuickLab lab edition | MPG-Git/QuickLab, `22f659666c2d10ded1c9cd3cd192881f18d06a7c`, version 1.2.0 | This release's maintained comparison/menu code; registered as QuickLabMPG |
 | NeuroLode | MPG-Git/NeuroLode, `0fc194d44330ba975346c3457da56d1fb00bce47` | Current main; hook 1.7.0 |
 | CUDAICA for Windows | CloudyDory/cudaica_win, `02aaf9c36c0b12346bccdc25eec195565634abdd` | Current upstream HEAD; 1.1; GPU execution unverified |
 | SPM | [Official MATLAB release 26.10.01](https://github.com/spm/spm/releases/tag/26.10.01) | Newest non-prerelease; replaces SPM12 r7771 |
