@@ -1,5 +1,16 @@
 # Hosted deployment
 
+## Desktop 1.3.1, 19 November 2026
+
+The deployed source/catalog pin is `51cd9a878920bb5a4e908e3c99bf69f629ca23b7`.
+The health endpoint reports 1.3.1; 13,177 shipped MATLAB files are recognized.
+The private collector at `bc98e692e9bbeb2421f08fc71efbee0522c58b1f` passed live
+run `44609108984`, including structured update details, deduplication and
+private issue delivery (synthetic issue #22). Catalog changes now dispatch
+the authorized live-test workflow automatically; service authorization and
+consent remain unchanged. The initial push test's synthetic issue #21 was
+also identified and closed.
+
 ## Desktop 1.3.0, 13 November 2026
 
 The live service imports `5d7ce55bdd30a4e64eda15f4dde1c70fa5d5ae01` with the
