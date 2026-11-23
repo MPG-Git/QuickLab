@@ -23,13 +23,16 @@ Check (-not (Test-TechnicalReport $report $catalog)) 'Uncataloged source rejecte
 $report.frames[0].sourceId=$sourceId
 $file=Join-Path $queue ('report-'+$report.eventId+'.json')
 $report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $file
-$script:calls=0;$script:offline=$false
-function Invoke-RestMethod { param($Method,$Uri,$ContentType,$Body,$TimeoutSec,$MaximumRedirection); $script:calls++; $script:lastBody=[Text.Encoding]::UTF8.GetString($Body); if($script:offline){throw 'Offline'}; return [pscustomobject]@{accepted=$true} }
+$script:calls=0;$script:offline=$false;$script:catalogPending=$false
+function Invoke-RestMethod { param($Method,$Uri,$ContentType,$Body,$TimeoutSec,$MaximumRedirection); $script:calls++; $script:lastBody=[Text.Encoding]::UTF8.GetString($Body); if($script:offline){throw 'Offline'}; if($script:catalogPending){throw [Net.WebException]::new('The remote server returned an error: (400) Bad Request.')}; return [pscustomobject]@{accepted=$true} }
 Check ((Send-TechnicalReportBatch $homeRoot $versionRoot) -eq 0 -and $script:calls -eq 0) 'No consent means no network request'
 @{enabled=$true;privacyVersion=1} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $reportRoot 'preferences.json')
 $script:offline=$true
 Check ((Send-TechnicalReportBatch $homeRoot $versionRoot) -eq 0 -and (Test-Path -LiteralPath $file)) 'Offline upload retains the report'
 $script:offline=$false
+$script:catalogPending=$true
+Check ((Send-TechnicalReportBatch $homeRoot $versionRoot) -eq 0 -and (Test-Path -LiteralPath $file)) 'Server catalog rejection retains the report for automatic retry'
+$script:catalogPending=$false
 Check ((Send-TechnicalReportBatch $homeRoot $versionRoot) -eq 1 -and -not (Test-Path -LiteralPath $file)) 'Acknowledged upload removes only the queued copy'
 Write-DesktopDiagnostic $homeRoot $versionRoot 'update' 21
 Check (@(Get-ChildItem -LiteralPath $queue -Filter 'report-*.json').Count -eq 1) 'Updater failures recorded without exception text'
