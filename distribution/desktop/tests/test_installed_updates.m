@@ -27,9 +27,10 @@ for name={'Biosig','Fieldtrip-lite','Fileio','PICARD','spm'}
 end
 assert(numel(PLUGINLIST)==54,'Expected 53 inventoried plugins plus EEG-BIDS.');
 menu=findall(groot,'Tag','mpg_updates'); callbackMenu=findall(groot,'Tag','mpg_check_updates');
-assert(numel(menu)==1 && strcmp(get(menu,'Label'),'Updates (1.4.1)'));
+release=jsondecode(fileread(fullfile(versionRoot,'setup','desktop','release.json')));
+assert(numel(menu)==1 && strcmp(get(menu,'Label'),['Updates (' release.version ')']));
 assert(numel(callbackMenu)==1 && strcmp(get(callbackMenu,'Label'),'Check for updates'));
-fprintf('PASS: real managed startup registers all 54 plugins without the remote catalog and displays Updates (1.4.1).\n');
+fprintf('PASS: real managed startup registers all 54 plugins without the remote catalog and displays Updates (%s).\n',release.version);
 
 statePath=fullfile(managedHome,'state.json'); originalState=fileread(statePath);
 restoreState=onCleanup(@() writeText(statePath,originalState)); %#ok<NASGU>

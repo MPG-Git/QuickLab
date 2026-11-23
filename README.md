@@ -8,7 +8,7 @@ For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distri
 The desktop installer finds MATLAB, creates shortcuts, and checks GitHub for
 tested updates. Updates are validated before activation, with a previous-version
 shortcut for rollback.
-Desktop version **1.4.1** retains **Save (+)**, filename additions, **Load Folder**,
+Desktop version **1.4.2** retains **Save (+)**, filename additions, **Load Folder**,
 the familiar toolbar order, filepath and ICA/rank rows, saved FFT preview,
 Previous/Next and the file selector. See the [layout guide](docs/GOLDEN_LAYOUT.md). It includes Windows **BINICA** and its
 runtime library, handles rank-reduced ICA/PCA, fixes the high-pass menu, and
@@ -23,9 +23,13 @@ with a new known-truth synthetic example.
 Existing users can close MATLAB, open **EEGLAB 2026**, and click **Yes**.
 The updater now displays installed and available versions, retries failed
 checks using a second download route, and offers updates again on the next
-launch after **No**. Use **Updates (1.4.1) > Check for updates** inside EEGLAB
+launch after **No**. Use **Updates (version) > Check for updates** inside EEGLAB
 for an explicit check. A failed check shows **Retry / Cancel** instead of
 silently appearing up to date. See [1.4.1 validation](distribution/releases/1.4.1.md).
+Version **1.4.2** is a small release for the lab's requested automatic-update
+trial. Analysis tools, plugin versions and synthetic examples are unchanged.
+After updating, confirm **Updates (1.4.2)**. See the
+[1.4.2 verification and directions](distribution/releases/1.4.2.md).
 **Practice data** runs the comparison, REST/Infinity, ICA and NeuroLode examples, with
 synthetic datasets and numeric reference outputs included. All 53 inventoried
 plugins and bundled EEG-BIDS remain included.
@@ -36,6 +40,8 @@ details. Lab members need no GitHub or Supabase account. See the
 [reporting details](distribution/desktop/REPORTING.md),
 [inventory](distribution/PLUGIN_INVENTORY.md) and
 [validation limits](distribution/VALIDATION.md).
+The reporting service's catalog deployment for 1.4.1/1.4.2 is still pending;
+unacknowledged reports remain queued. Software updates work independently.
 
 ## Install or update
 
