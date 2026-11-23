@@ -29,10 +29,15 @@ jobs:
           cd release-publish
           sha256sum --check SHA256SUMS
           python3 - <<'PY'
-          import json, zipfile
+          import json, zipfile, hashlib
           with zipfile.ZipFile('EEGLAB2026-Update.zip') as archive:
               release=json.loads(archive.read('desktop/release.json'))
               assert release['version']=='1.4.1' and release['tag']=='eeglab-desktop-v1.4.1'
+          with open('desktop-update.json', encoding='utf-8') as stream:
+              descriptor=json.load(stream)
+          assert descriptor['schemaVersion']==1 and descriptor['version']==release['version'] and descriptor['tag']==release['tag']
+          assert descriptor['sha256']==hashlib.sha256(open('EEGLAB2026-Update.zip','rb').read()).hexdigest()
+          assert descriptor['url']=='https://github.com/MPG-Git/QuickLab/releases/download/'+release['tag']+'/EEGLAB2026-Update.zip'
           PY
       - name: Prepare verified draft release
         env:
