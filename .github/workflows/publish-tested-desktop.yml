@@ -1,0 +1,64 @@
+name: Publish tested EEGLAB Desktop 1.4.1
+on:
+  push:
+    branches: [codex/desktop-release-1-4-1]
+    paths:
+      - '.github/workflows/publish-tested-desktop.yml'
+      - 'release-publish/**'
+env:
+  PUBLISH_READY: 'false'
+permissions:
+  contents: write
+concurrency:
+  group: publish-eeglab-desktop-v1.4.1
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact locally tested artifacts and release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = 'MPG-Git/QuickLab'
+          test "$(gh api repos/MPG-Git/QuickLab/git/ref/tags/eeglab-desktop-v1.4.1 --jq .object.sha)" = '00ab9092f490517927064c5f8e8adee3012a1fd5'
+          cd release-publish
+          sha256sum --check SHA256SUMS
+          python3 - <<'PY'
+          import json, zipfile
+          with zipfile.ZipFile('EEGLAB2026-Update.zip') as archive:
+              release=json.loads(archive.read('desktop/release.json'))
+              assert release['version']=='1.4.1' and release['tag']=='eeglab-desktop-v1.4.1'
+          PY
+      - name: Prepare verified draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view eeglab-desktop-v1.4.1 --repo MPG-Git/QuickLab --json isDraft >/dev/null 2>&1; then
+            test "$(gh release view eeglab-desktop-v1.4.1 --repo MPG-Git/QuickLab --json isDraft --jq .isDraft)" = true
+            exit 0
+          fi
+          gh release create eeglab-desktop-v1.4.1 \
+            release-publish/EEGLAB2026-Setup.exe release-publish/EEGLAB2026-Update.zip release-publish/desktop-update.json \
+            --repo MPG-Git/QuickLab --verify-tag --draft \
+            --title 'EEGLAB Desktop 1.4.1 - Reliable versioned updates' \
+            --notes-file release-publish/NOTES.md
+      - name: Publish only after reporting deployment and private live verification
+        if: env.PUBLISH_READY == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, urllib.request
+          with urllib.request.urlopen('https://xuhumtlubgkqfcfrrwiv.supabase.co/functions/v1/eeglab-reports/health', timeout=20) as response:
+              assert json.load(response)['release']=='1.4.1', 'Reporting catalog is not ready'
+          PY
+          gh release edit eeglab-desktop-v1.4.1 --repo MPG-Git/QuickLab --draft=false --latest
