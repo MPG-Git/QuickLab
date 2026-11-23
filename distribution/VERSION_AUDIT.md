@@ -1,6 +1,6 @@
 # Version audit — upstream 13 November; QuickLab 19 November 2026
 
-Desktop **1.4.0** retains **EEGLAB 2026.1.0**, the newest ZIP listed at the 13 November audit by the
+Desktop **1.4.1** retains **EEGLAB 2026.1.0**, the newest ZIP listed at the 13 November audit by the
 [official publisher](https://sccn.ucsd.edu/eeglab/download/daily/).
 At that audit, all 49 catalog-managed plugins from the 53-plugin inventory matched the
 [current stable EEGLAB catalog](https://sccn.ucsd.edu/eeglab/plugin_uploader/plugin_list_all.php).
@@ -27,6 +27,9 @@ development branch or every possible EEGLAB extension.
 
 ## Packaging adaptations
 
+- Desktop 1.4.1 changes one guarded condition in EEGLAB 2026.1.0 so local
+  versioned plugins without a hook are registered when the remote plugin
+  catalog is unavailable. Upstream update checks and plugin hooks still run.
 - Versioned folders supply missing metadata for AAR, Adjust, MARA, TBT,
   automagic, erppeakinterval, fullRankAveRef, std_dipoleDensity and trimOutlier.
 - EYE-EEG's official 1.0.1 archive says `1.01` in its hook; the installer

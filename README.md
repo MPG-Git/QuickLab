@@ -8,7 +8,7 @@ For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distri
 The desktop installer finds MATLAB, creates shortcuts, and checks GitHub for
 tested updates. Updates are validated before activation, with a previous-version
 shortcut for rollback.
-Desktop version **1.4.0** restores **Save (+)**, filename additions, **Load Folder**,
+Desktop version **1.4.1** retains **Save (+)**, filename additions, **Load Folder**,
 the familiar toolbar order, filepath and ICA/rank rows, saved FFT preview,
 Previous/Next and the file selector. See the [layout guide](docs/GOLDEN_LAYOUT.md). It includes Windows **BINICA** and its
 runtime library, handles rank-reduced ICA/PCA, fixes the high-pass menu, and
@@ -21,6 +21,11 @@ corrected. REST and FieldTrip Infinity can be compared using one shared leadfiel
 with a new known-truth synthetic example.
 
 Existing users can close MATLAB, open **EEGLAB 2026**, and click **Yes**.
+The updater now displays installed and available versions, retries failed
+checks using a second download route, and offers updates again on the next
+launch after **No**. Use **Updates (1.4.1) > Check for updates** inside EEGLAB
+for an explicit check. A failed check shows **Retry / Cancel** instead of
+silently appearing up to date. See [1.4.1 validation](distribution/releases/1.4.1.md).
 **Practice data** runs the comparison, REST/Infinity, ICA and NeuroLode examples, with
 synthetic datasets and numeric reference outputs included. All 53 inventoried
 plugins and bundled EEG-BIDS remain included.

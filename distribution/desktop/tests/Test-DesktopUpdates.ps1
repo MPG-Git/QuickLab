@@ -62,7 +62,8 @@ Copy-Item -LiteralPath (Join-Path $desktopSource 'Update-Launch.ps1') -Destinati
 $common=Get-Content -Raw -LiteralPath (Join-Path $desktopSource 'Desktop-Common.ps1')
 $common += @'
 
-function Get-DesktopUpdate($State) { throw 'Simulated offline network' }
+function Invoke-DesktopUpdateCheck($HomeRoot,$State) { throw 'Simulated offline network' }
+function Show-DesktopMessage { return 'Cancel' }
 function Start-DesktopMatlab($State,[string]$Mode) { [IO.File]::WriteAllText((Join-Path $HomeRoot 'launch-observed.txt'),$State.current.version + ':' + $Mode) }
 '@
 [IO.File]::WriteAllText((Join-Path $controller 'Desktop-Common.ps1'),$common)

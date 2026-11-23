@@ -18,15 +18,17 @@ are not independently synchronized.
    get a higher version. Keep schema version 1 unless a compatible migration is
    implemented and tested.
 3. Run `tests/Test-DesktopUpdates.ps1` under Windows PowerShell 5.1. Build with
+   `tests/Test-UpdateDiscovery.ps1` too. Build with
    `Build-DesktopInstaller.ps1 -OutputDirectory <new-folder>`. This creates the
-   single EXE and `EEGLAB2026-Update.zip` from the same source payload.
+   single EXE and `EEGLAB2026-Update.zip` from the same source payload, plus
+   `desktop-update.json` containing that exact ZIP's SHA-256 digest.
 4. Test the built payload into an isolated installation, including actual
    MATLAB startup, the two synthetic examples, upgrade, failed-update retention,
    offline launch and rollback. Review algorithm changes with appropriate
    scientific tests; the installation examples are not comprehensive validation
    of every plugin. Record actual results in `distribution/VALIDATION.md`.
 5. Commit and push the tested sources. Create a **draft** GitHub release for
-   the matching desktop tag and commit. Upload both build artifacts, then
+   the matching desktop tag and commit. Upload all three build artifacts, then
    publish it as a stable release. GitHub must report the update ZIP's
    `sha256:...` asset digest. Drafts, prereleases, missing hashes, and release
    assets outside this repository are ignored by the client.
@@ -36,8 +38,10 @@ are not independently synchronized.
 
 No download account or credential is installed on the user's computer. The
 initial EXE is unsigned; code signing is a separate distribution improvement.
-The update digest is verified against GitHub's HTTPS API, not a claim of an
-independent code-signing identity.
+The update digest comes from GitHub's HTTPS API or the publisher's descriptor
+at the fixed HTTPS release asset URL. Neither is a claim of an independent
+code-signing identity. Always publish the generated descriptor with the ZIP;
+never manually substitute its hash or point it at another repository.
 
 ## Operational behavior
 
@@ -48,8 +52,16 @@ and synthetic examples must pass before switching that pointer. Changes never
 patch the files of a running MATLAB session. The package cache is addressed by
 hash so new plugin versions do not collide with old downloads.
 
-The launcher asks before an update, with a one-day deferral when declined.
-Network/API errors fall back to the installed version. A rollback selects the
+Starting in 1.4.1, the launcher names the installed and offered versions.
+Declining skips only this launch; legacy day-long deferrals are ignored.
+Checks try the API, a release-asset descriptor outside the API rate limit, then
+one API retry, with 12-second request timeouts and a 60-second worker limit.
+Checks run outside the UI thread. Total failure shows **Retry / Cancel**, where
+Cancel opens the installed version. Failures cannot appear as "up to date".
+**Updates (version) > Check for updates** runs the same controller inside
+EEGLAB without closing the working session or opening a second MATLAB. After
+an accepted in-app update, the user saves, closes MATLAB and reopens the shortcut.
+A rollback selects the
 previous validated folder and holds back the rejected release until a newer
 one is published. Raw logs stay local. Version 1.1.0 can send allowlisted technical
 error records only after the user opts in; see [REPORTING.md](REPORTING.md).
@@ -59,6 +71,11 @@ MATLAB checks do not block the window's UI. An installation lock prevents two
 launchers from changing the active pointer simultaneously. Interrupted and
 failed candidates are retained for diagnosis; there is no automatic recursive
 cleanup of old versions or user files.
+
+These improvements arrive through the existing update ZIP; the stable launcher
+EXE is unchanged. An older client still uses its older check until it receives
+1.4.1. A shortcut that opens an unrelated EEGLAB installation cannot receive this
+distribution's updates. Use the managed **EEGLAB 2026** shortcut.
 
 For releases with reporting, regenerate the code-source catalog using
 `distribution/reporting-service/build_catalog.py` against the validated install.

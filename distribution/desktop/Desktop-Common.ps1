@@ -54,6 +54,7 @@ function Test-DesktopCandidate([string]$Folder,[string]$MatlabExe,$Diagnostic=$n
     $arguments = '-wait -sd "' + $Folder + '" -logfile "' + $log + '" -batch "validate_desktop_update"'
     try { $process = Start-Process -FilePath $MatlabExe -ArgumentList $arguments -WorkingDirectory $Folder -WindowStyle Hidden -PassThru }
     catch { if ($Diagnostic) { $Diagnostic.reason='matlab-launch' }; throw }
+    $null=$process.Handle
     $deadline = [DateTime]::UtcNow.AddMinutes(10)
     while (-not $process.WaitForExit(250)) {
         if ('Windows.Forms.Application' -as [type]) { [Windows.Forms.Application]::DoEvents() }
@@ -116,11 +117,9 @@ function New-DesktopShortcuts([string]$HomeRoot,[string]$Desktop,[string]$Matlab
         $link.Save()
     }
 }
-function Get-DesktopUpdate($State) {
-    $headers = @{'User-Agent'='MPG-EEGLAB-Launcher';Accept='application/vnd.github+json'}
-    $releases = Invoke-RestMethod -Uri 'https://api.github.com/repos/MPG-Git/QuickLab/releases?per_page=30' -Headers $headers -TimeoutSec 5
+function Select-DesktopUpdate($State,$Releases) {
     $eligible = @()
-    foreach ($release in $releases) {
+    foreach ($release in $Releases) {
         if ($release.draft -or $release.prerelease -or $release.tag_name -notmatch '^eeglab-desktop-v(\d+\.\d+\.\d+)$') { continue }
         $version = $Matches[1]
         if ([version]$version -le [version]$State.current.version -or [version]$version -le [version]$State.holdThroughVersion) { continue }
@@ -134,6 +133,69 @@ function Get-DesktopUpdate($State) {
         $eligible += [pscustomobject]@{version=$version;tag=$release.tag_name;url=$expectedUrl;sha256=$digest}
     }
     return $eligible | Sort-Object { [version]$_.version } -Descending | Select-Object -First 1
+}
+function Get-DesktopUpdate($State) {
+    $headers = @{'User-Agent'='MPG-EEGLAB-Launcher';Accept='application/vnd.github+json';'Cache-Control'='no-cache'}
+    $api='https://api.github.com/repos/MPG-Git/QuickLab/releases?per_page=100'
+    # A second HTTPS route avoids the shared-IP REST API rate limit. The
+    # publisher uploads this descriptor with the exact tested ZIP's hash.
+    $channel='https://github.com/MPG-Git/QuickLab/releases/latest/download/desktop-update.json'
+    $lastFailure=$null
+    foreach ($route in @($api,$channel,$api)) {
+        try {
+            $response=Invoke-RestMethod -Uri $route -Headers $headers -TimeoutSec 12
+            if ($route -eq $channel) {
+                Assert-DesktopRelease $response
+                $expected='https://github.com/MPG-Git/QuickLab/releases/download/'+$response.tag+'/EEGLAB2026-Update.zip'
+                if ($response.url -cne $expected -or $response.sha256 -cnotmatch '^[a-fA-F0-9]{64}$') { throw 'Invalid update channel metadata.' }
+                $response=@([pscustomobject]@{draft=$false;prerelease=$false;tag_name=$response.tag;assets=@([pscustomobject]@{name='EEGLAB2026-Update.zip';state='uploaded';digest=('sha256:'+$response.sha256);browser_download_url=$response.url})})
+            } elseif ($null -eq $response -or @($response | Where-Object { -not $_.PSObject.Properties['tag_name'] }).Count) {
+                throw 'Invalid update release list.'
+            }
+            return Select-DesktopUpdate $State $response
+        } catch { $lastFailure=$_ }
+    }
+    throw $lastFailure
+}
+function Get-DesktopUpdatePrompt($State,$Update,[switch]$NoOpen) {
+    $action='Update and open EEGLAB?'
+    $after='Yes: install and check the update first.'
+    if ($NoOpen) { $action='Install this update?'; $after='After installation, save your work, close MATLAB, and open the EEGLAB 2026 shortcut.' }
+    return "EEGLAB Desktop $($Update.version) is available.`nYour installed version: $($State.current.version).`n`n$action`n`n$after`nNo: keep your current version and ask again next time."
+}
+function Show-DesktopMessage([string]$Text,[string]$Title,[string]$Buttons='OK') {
+    return [Windows.Forms.MessageBox]::Show($Text,$Title,[Windows.Forms.MessageBoxButtons]$Buttons,[Windows.Forms.MessageBoxIcon]::Information)
+}
+function Invoke-DesktopUpdateCheck([string]$HomeRoot,$State) {
+    # Network I/O runs outside the UI thread. Bound the worker too: DNS and
+    # proxy failures can exceed an HTTP client's nominal timeout.
+    $resultPath=Join-Path $HomeRoot ('update-check-'+[guid]::NewGuid().ToString('N')+'.json')
+    $progress=New-Object Windows.Forms.Form
+    $progress.Text='Checking EEGLAB updates'; $progress.Width=560; $progress.Height=170; $progress.StartPosition='CenterScreen'; $progress.ControlBox=$false
+    $label=New-Object Windows.Forms.Label
+    $label.Text="Installed: EEGLAB Desktop $($State.current.version).`nChecking for a newer tested version..."
+    $label.Font=New-Object Drawing.Font('Segoe UI',13); $label.Dock='Fill'; $label.Padding=New-Object Windows.Forms.Padding(18)
+    $progress.Controls.Add($label); $progress.Show(); [Windows.Forms.Application]::DoEvents()
+    try {
+        $script=Join-Path $PSScriptRoot 'Check-DesktopUpdate.ps1'
+        $arguments='-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "'+$script+'" -HomeRoot "'+$HomeRoot+'" -ResultPath "'+$resultPath+'"'
+        $worker=Start-Process -FilePath (Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe') -ArgumentList $arguments -WindowStyle Hidden -PassThru
+        $null=$worker.Handle
+        $deadline=[DateTime]::UtcNow.AddSeconds(60)
+        while (-not $worker.WaitForExit(100)) {
+            [Windows.Forms.Application]::DoEvents()
+            if ([DateTime]::UtcNow -gt $deadline) { $worker.Kill(); throw [TimeoutException]::new('The update check timed out.') }
+        }
+        if ($worker.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $resultPath)) { throw 'The update checker could not finish.' }
+        $result=Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
+        if ($result.status -eq 'unavailable') {
+            $failure=[Exception]::new('The update servers could not be reached.')
+            $failure.Data['updateDetail']=$result.detail
+            throw $failure
+        }
+        if ($result.status -ne 'checked') { throw 'Invalid update check result.' }
+        return $result.update
+    } finally { $progress.Close(); $progress.Dispose() }
 }
 function Get-DesktopUpdateSource([string]$HomeRoot,$Update,$Diagnostic=$null) {
     Set-UpdateStage $Diagnostic 'download'

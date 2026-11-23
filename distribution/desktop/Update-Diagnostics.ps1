@@ -34,6 +34,7 @@ function Get-UpdateFailureDetail($ErrorRecord,$Detail) {
             }
         }
         if ($exception -is [UnauthorizedAccessException]) { $Detail.reason='access-denied' }
+        if ($exception -is [TimeoutException]) { $Detail.reason='timeout' }
         if ($exception -is [IO.PathTooLongException]) { $Detail.reason='path-too-long' }
         if ($exception -is [IO.InvalidDataException]) { $Detail.reason='archive-invalid' }
         switch ($exception.HResult -band 65535) { 112 { $Detail.reason='disk-full' }; 32 { $Detail.reason='file-in-use' } }

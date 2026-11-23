@@ -88,6 +88,14 @@ function Expand-SelectedArchive([string]$zipPath, [string]$prefix, [string]$dest
 $core = Join-Path $target 'eeglab2026.1.0'
 $archive = Get-VerifiedArchive $manifest.base 'eeglab2026.1.0.zip'
 $null = Expand-SelectedArchive $archive $manifest.base.archive_root $core -Core
+# EEGLAB 2026.1.0 ties registration of packages without an eegplugin hook to
+# the remote catalog. Register their local versioned folders even offline;
+# leave upstream version checking and hook execution unchanged.
+$coreFile=Join-Path $core 'eeglab.m'
+$coreText=[IO.File]::ReadAllText($coreFile)
+$registration='if (~isempty(pluginVersion) && ~isempty(pluginlist) && ~isempty(pluginstats)) || ~isempty(funcname)'
+if ($coreText.Split(@($registration),[StringSplitOptions]::None).Length -ne 2) { throw 'Review upstream offline plugin registration before updating this patch.' }
+[IO.File]::WriteAllText($coreFile,$coreText.Replace($registration,'if ~isempty(pluginVersion) || ~isempty(funcname)'),(New-Object Text.UTF8Encoding($false)))
 # Keep the rank disagreement visible but remove the incorrect OS diagnosis.
 $icaFile = Join-Path $core 'functions\popfunc\pop_runica.m'
 $icaText = [IO.File]::ReadAllText($icaFile)

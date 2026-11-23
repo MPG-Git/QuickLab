@@ -15,7 +15,7 @@ from the installation; official publishers' sample/template data are retained.
 
 ## Install once, then use the desktop shortcut
 
-1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.4.0).
+1. Download **EEGLAB2026-Setup.exe** from the [desktop release](https://github.com/MPG-Git/QuickLab/releases/tag/eeglab-desktop-v1.4.1).
 2. Double-click it, then click **Install and open EEGLAB**. MATLAB is detected automatically; choose its `matlab.exe` if detection fails.
 3. Wait for the downloads and practice checks. MATLAB windows may open briefly during validation. EEGLAB opens when the checks pass.
 
@@ -26,14 +26,16 @@ The installer downloads approximately 1 GB and needs extra disk space for the ap
 The desktop shortcuts are:
 
 - **EEGLAB 2026**: check for a tested update, then open EEGLAB.
-- **EEGLAB Practice**: open EEGLAB and run both generated-data examples.
+- **EEGLAB Practice**: open EEGLAB and run the generated-data examples.
 - **EEGLAB Previous Version**: switch back to the previous validated installation. Available after the first update.
 
 ### How updates work
 
-At launch, the shortcut checks public MPG-Git/QuickLab releases. A newer stable desktop release offers a **Yes / No** choice: update and open, or use the current version. Declining postpones the offer for a day. Offline or unavailable GitHub checks still open the installed version.
+At launch, the shortcut checks public MPG-Git/QuickLab releases. Starting in 1.4.1, the **Yes / No** prompt names the installed and available versions. **No** skips only this launch. Checks retry through a second HTTPS download route if the GitHub API fails. If all attempts fail, **Retry** checks again and **Cancel** opens the installed version.
 
-An update is downloaded, checked against GitHub's SHA-256 digest, installed into a new version folder, and tested in MATLAB. Startup registration for all inventoried plugins and both synthetic examples must pass before the active version changes. Failed checks preserve the current installation. Old versions and practice outputs are retained; recordings are never an update target. Running MATLAB sessions continue using their existing installation.
+Inside EEGLAB, use **Updates (version) > Check for updates**. This leaves your working session open. After an accepted update finishes, save your work, close MATLAB, and reopen **EEGLAB 2026**. The update replaces neither your running session nor its data.
+
+An update is downloaded, checked against the SHA-256 digest in GitHub's release API or the publisher's HTTPS release descriptor, installed into a new version folder, and tested in MATLAB. Startup registration for all inventoried plugins and the synthetic examples must pass before the active version changes. Failed checks preserve the current installation. Old versions and practice outputs are retained; recordings are never an update target. Running MATLAB sessions continue using their existing installation.
 
 After a rollback, that release is held back so it is not immediately offered again. A later release can still be offered. Third-party plugin updates and GitHub commits are included only when the maintainer pins and tests them in a new desktop release. See [publishing updates](desktop/UPDATING.md).
 

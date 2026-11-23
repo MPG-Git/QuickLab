@@ -12,6 +12,7 @@ $zip = [IO.Compression.ZipFile]::Open($zipPath,[IO.Compression.ZipArchiveMode]::
 try {
     $files = @('Install-EEGLAB.ps1','manifest.json','README.md','VALIDATION.md','PLUGIN_INVENTORY.md','start_eeglab_replacement.m','check_eeglab_replacement.m','run_replacement_examples.m','desktop/Complete-DesktopSetup.ps1','desktop/eeglab_desktop_start.m','desktop/eeglab_practice.m','desktop/release.json','desktop/Launch-EEGLAB.ps1','desktop/Desktop-Common.ps1','desktop/Update-Launch.ps1','desktop/validate_desktop_update.m')
     $files += 'desktop/Apply-DesktopUpdate.ps1'
+    $files += 'desktop/Check-DesktopUpdate.ps1'
     $files += 'desktop/Update-Diagnostics.ps1'
     $files += 'VERSION_AUDIT.md'
     $files += 'desktop/UPDATING.md'
@@ -24,4 +25,7 @@ $exe = Join-Path $output 'EEGLAB2026-Setup.exe'
 & $compiler /nologo /target:winexe /platform:anycpu /optimize+ /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.IO.Compression.dll /r:System.IO.Compression.FileSystem.dll ("/resource:$zipPath,SetupPayload.zip") ("/out:$exe") (Join-Path $PSScriptRoot 'Setup.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
 Copy-Item -LiteralPath $zipPath -Destination (Join-Path $output 'EEGLAB2026-Update.zip')
+$release=Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'release.json') | ConvertFrom-Json
+$descriptor=[ordered]@{schemaVersion=1;version=$release.version;tag=$release.tag;url=('https://github.com/MPG-Git/QuickLab/releases/download/'+$release.tag+'/EEGLAB2026-Update.zip');sha256=(Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash.ToLowerInvariant()}
+[IO.File]::WriteAllText((Join-Path $output 'desktop-update.json'),($descriptor | ConvertTo-Json),(New-Object Text.UTF8Encoding($false)))
 Get-FileHash -LiteralPath $exe -Algorithm SHA256
