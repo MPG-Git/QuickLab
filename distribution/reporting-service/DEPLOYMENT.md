@@ -1,5 +1,15 @@
 # Hosted deployment
 
+## Desktop 1.4.1, 23 November 2026 — catalog deployment pending
+
+The updater is published independently of reporting. QuickLab catalog/source
+`2e8b18b90c5281ec4bf1359f7fe328fc7945017e` and private collector
+`a82924cee05a64f899b3c80ccf229762fa7dad47` recognize 1.4.1. The live function
+still reports 1.4.0. Its catalog deployment and successful 1.4.1 delivery check
+remain outstanding. The exact installed sender preserves unacknowledged reports
+and retries automatically; existing consent and 30-day queue retention apply.
+See [release verification](../releases/1.4.1.md).
+
 ## Desktop 1.4.0, 19 November 2026
 
 Supabase imports `9dbd96957d311017180573305662f5f13a684c43` for service,

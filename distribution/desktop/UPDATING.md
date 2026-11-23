@@ -80,7 +80,10 @@ distribution's updates. Use the managed **EEGLAB 2026** shortcut.
 For releases with reporting, regenerate the code-source catalog using
 `distribution/reporting-service/build_catalog.py` against the validated install.
 Preserve previous catalogs, deploy the updated service and private collector,
-and run the manual synthetic live test before publishing the installer. The
+and run the manual synthetic live test. Reporting is separate from software
+update eligibility: if a catalog deployment is delayed, verify that unacknowledged
+reports remain queued and disclose the pending delivery status. Never claim live
+delivery before its synthetic test passes. The
 function can use HTTPS imports pinned to an immutable QuickLab commit. Never
 import a moving branch in production. Run the reporting PowerShell, MATLAB and
 Node tests in addition to the update checks.

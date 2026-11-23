@@ -23,6 +23,12 @@ $channel=[pscustomobject]@{schemaVersion=1;version='1.4.1';tag='eeglab-desktop-v
 Route @((Release '1.4.1'))
 Check ((Get-DesktopUpdate $state).version -eq '1.4.1') 'Normal API discovers update despite stale legacy deferral'
 Check ($script:calls.Count -eq 1 -and $script:calls[0].timeout -eq 12 -and $script:calls[0].headers['Cache-Control'] -eq 'no-cache') 'Successful check is bounded and does not request cached responses'
+$state.current.version='1.4.1'
+Route @((Release '1.4.2'))
+$future=Get-DesktopUpdate $state
+$futurePrompt=Get-DesktopUpdatePrompt $state $future
+Check ($future.version -eq '1.4.2' -and $futurePrompt.Contains('1.4.1') -and $futurePrompt.Contains('1.4.2')) 'Installed 1.4.1 offers a later release and names both versions without a new installer'
+$state.current.version='1.4.0'
 Route @([Exception]::new('API rate limited'),$channel)
 Check ((Get-DesktopUpdate $state).version -eq '1.4.1' -and $script:calls.Count -eq 2 -and $script:calls[1].uri -like 'https://github.com/*') 'API failure falls back to published HTTPS descriptor without API credentials'
 Route @([TimeoutException]::new('timeout'),[Exception]::new('missing descriptor'),(Release '1.4.1'))
