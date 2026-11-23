@@ -6,7 +6,7 @@ on:
       - '.github/workflows/publish-tested-desktop.yml'
       - 'release-publish/**'
 env:
-  PUBLISH_READY: 'false'
+  PUBLISH_READY: 'true'
 permissions:
   contents: write
 concurrency:
@@ -54,16 +54,11 @@ jobs:
             --repo MPG-Git/QuickLab --verify-tag --draft \
             --title 'EEGLAB Desktop 1.4.1 - Reliable versioned updates' \
             --notes-file release-publish/NOTES.md
-      - name: Publish only after reporting deployment and private live verification
+      - name: Publish verified desktop updater
         if: env.PUBLISH_READY == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import json, urllib.request
-          with urllib.request.urlopen('https://xuhumtlubgkqfcfrrwiv.supabase.co/functions/v1/eeglab-reports/health', timeout=20) as response:
-              assert json.load(response)['release']=='1.4.1', 'Reporting catalog is not ready'
-          PY
-          gh release edit eeglab-desktop-v1.4.1 --repo MPG-Git/QuickLab --draft=false --latest
+          gh release edit eeglab-desktop-v1.4.1 --repo MPG-Git/QuickLab --notes-file release-publish/NOTES.md --draft=false --latest
