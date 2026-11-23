@@ -1,0 +1,64 @@
+name: Publish tested EEGLAB Desktop 1.4.2
+on:
+  push:
+    branches: [codex/desktop-release-1-4-2]
+    paths:
+      - '.github/workflows/publish-tested-desktop.yml'
+      - 'release-publish/**'
+env:
+  PUBLISH_READY: 'true'
+permissions:
+  contents: write
+concurrency:
+  group: publish-eeglab-desktop-v1.4.2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact locally tested artifacts and release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = 'MPG-Git/QuickLab'
+          test "$(gh api repos/MPG-Git/QuickLab/git/ref/tags/eeglab-desktop-v1.4.2 --jq .object.sha)" = '4d0e0a043651a1947e376c457f63be4083de3458'
+          cd release-publish
+          sha256sum --check SHA256SUMS
+          python3 - <<'PY'
+          import json, zipfile, hashlib
+          with zipfile.ZipFile('EEGLAB2026-Update.zip') as archive:
+              release=json.loads(archive.read('desktop/release.json'))
+              assert release['version']=='1.4.2' and release['tag']=='eeglab-desktop-v1.4.2'
+          with open('desktop-update.json', encoding='utf-8') as stream:
+              descriptor=json.load(stream)
+          assert descriptor['schemaVersion']==1 and descriptor['version']==release['version'] and descriptor['tag']==release['tag']
+          assert descriptor['sha256']==hashlib.sha256(open('EEGLAB2026-Update.zip','rb').read()).hexdigest()
+          assert descriptor['url']=='https://github.com/MPG-Git/QuickLab/releases/download/'+release['tag']+'/EEGLAB2026-Update.zip'
+          PY
+      - name: Prepare verified draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view eeglab-desktop-v1.4.2 --repo MPG-Git/QuickLab --json isDraft >/dev/null 2>&1; then
+            test "$(gh release view eeglab-desktop-v1.4.2 --repo MPG-Git/QuickLab --json isDraft --jq .isDraft)" = true
+            exit 0
+          fi
+          gh release create eeglab-desktop-v1.4.2 \
+            release-publish/EEGLAB2026-Setup.exe release-publish/EEGLAB2026-Update.zip release-publish/desktop-update.json \
+            --repo MPG-Git/QuickLab --verify-tag --draft \
+            --title 'EEGLAB Desktop 1.4.2 - Automatic update trial' \
+            --notes-file release-publish/NOTES.md
+      - name: Publish verified desktop updater
+        if: env.PUBLISH_READY == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release edit eeglab-desktop-v1.4.2 --repo MPG-Git/QuickLab --notes-file release-publish/NOTES.md --draft=false --latest
