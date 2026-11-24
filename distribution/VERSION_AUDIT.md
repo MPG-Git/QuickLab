@@ -1,6 +1,6 @@
-# Version audit — upstream 13 November; QuickLab 19 November 2026
+# Version audit — upstream 13 November; QuickLab 24 November 2026
 
-Desktop **1.4.1** retains **EEGLAB 2026.1.0**, the newest ZIP listed at the 13 November audit by the
+Desktop **1.4.3** retains **EEGLAB 2026.1.0**, the newest ZIP listed at the 13 November audit by the
 [official publisher](https://sccn.ucsd.edu/eeglab/download/daily/).
 At that audit, all 49 catalog-managed plugins from the 53-plugin inventory matched the
 [current stable EEGLAB catalog](https://sccn.ucsd.edu/eeglab/plugin_uploader/plugin_list_all.php).
@@ -14,7 +14,7 @@ The four separately maintained entries are:
 
 | Component | Selected source | Check |
 | --- | --- | --- |
-| QuickLab lab edition | MPG-Git/QuickLab, `22f659666c2d10ded1c9cd3cd192881f18d06a7c`, version 1.2.0 | This release's maintained comparison/menu code; registered as QuickLabMPG |
+| QuickLab lab edition | MPG-Git/QuickLab, `f9697b6f8e111e5aa5b69801e4468ed2b6597f7d`, version 1.2.1 | Fixes unepoch arguments, time axis and boundaries; retains original dataset and adds synthetic practice |
 | NeuroLode | MPG-Git/NeuroLode, `0fc194d44330ba975346c3457da56d1fb00bce47` | Current main; hook 1.7.0 |
 | CUDAICA for Windows | CloudyDory/cudaica_win, `02aaf9c36c0b12346bccdc25eec195565634abdd` | Current upstream HEAD; 1.1; GPU execution unverified |
 | SPM | [Official MATLAB release 26.10.01](https://github.com/spm/spm/releases/tag/26.10.01) | Newest non-prerelease; replaces SPM12 r7771 |

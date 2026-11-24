@@ -1,3 +1,27 @@
+## Unepoch regression fix — 24 November 2026
+
+Desktop 1.4.3 includes QuickLabMPG 1.2.1. The historical menu requested two
+outputs from a one-output function. The function now supports both outputs,
+uses correct seconds/millisecond timing, retains event and urevent information,
+and marks joins with boundary events of unknown duration. It keeps ICA weights,
+clears epoch-shaped rejection/spectral caches and records conversion provenance.
+The menu adds a continuous-format copy and retains the epoched original.
+
+MATLAB R2023b Update 3 with EEGLAB 2026.1.0 passed all 36 QuickLab regression
+tests, including 29 channels x 2047 samples x 35 epochs, single-epoch/no-event
+inputs, exact continuous no-op, ICA/rejection state, event preservation and
+save/reload. The actual menu callback passed, including original retention.
+The original REST 1.2 GUI Run callback agreed with the known solver for both
+3D epoched and 2D continuous data using the same supplied leadfield. Its 3D
+warning is informational; unepoching is not required for REST.
+
+The shipped unepoch practice example has 8 channels, 4 x 250 input samples,
+1000 output samples, three joins at 250.5/500.5/750.5 samples, last sample time
+3.996 seconds and zero difference between REST before and after conversion.
+It includes synthetic input/output SET files, metrics and a visually checked
+boundary plot. Tests use synthetic data, not David's recordings. MATLAB
+R2026a (shown in his screenshot) was not available for local execution.
+
 # Validation of the EEGLAB replacement build
 
 ## Desktop 1.3.1 layout checks, 19 November 2026

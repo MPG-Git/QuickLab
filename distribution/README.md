@@ -98,7 +98,7 @@ QuickLab uses the tested MPG-Git custom version; additional local menu edits on
 another computer cannot be reconstructed from a startup log alone.
 Desktop 1.2.0 corrects missing version labels using versioned plugin folders
 and normalizes EYE-EEG's hook version spelling. Our maintained edition is
-registered as **QuickLabMPG 1.0.0**, with the usual **QuickLab** menu, so it is
+registered as **QuickLabMPG 1.2.1**, with the usual **QuickLab** menu, so it is
 not mistaken for the historical QuickLab 0.91 catalog plugin.
 Fileio's redundant standalone startup function is omitted; its readers and
 writers remain installed, using FieldTrip-lite's initializer. FieldTrip's

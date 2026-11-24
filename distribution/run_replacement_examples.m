@@ -10,17 +10,18 @@ previousPath = path;
 cleanup = onCleanup(@() path(previousPath)); %#ok<NASGU>
 mkdir(outputDirectory);
 core = fullfile(root,'eeglab2026.1.0');
-quick = fullfile(core,'plugins','QuickLabMPG1.2.0','examples','synthetic');
+quick = fullfile(core,'plugins','QuickLabMPG1.2.1','examples','synthetic');
 neuro = fullfile(core,'plugins','Neurolode','examples','synthetic');
 addpath(quick,'-begin');
 clear demo_prepare demo_verify demo_portable_set;
 run_quicklab_demo(fullfile(outputDirectory,'QuickLab'));
 run_ica_demo(fullfile(outputDirectory,'ICA'));
 run_rest_demo(fullfile(outputDirectory,'REST'));
+run_unepoch_demo(fullfile(outputDirectory,'Unepoch'));
 generate_fft_preview(fullfile(outputDirectory,'ICA','synthetic_rank3.set'),fullfile(outputDirectory,'ICA'));
 rmpath(quick);
 clear demo_prepare demo_verify demo_portable_set;
 addpath(neuro,'-begin');
 run_neurolode_demo(fullfile(outputDirectory,'NeuroLode'));
-fprintf('Comparison, ICA and NeuroLode examples passed. Outputs: %s\n',outputDirectory);
+fprintf('Comparison, REST/Infinity, unepoch, ICA and NeuroLode examples passed. Outputs: %s\n',outputDirectory);
 end

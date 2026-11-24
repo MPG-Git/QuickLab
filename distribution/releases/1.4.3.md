@@ -1,0 +1,79 @@
+# Desktop 1.4.3 — restore UN-Epoch, 24 November 2026
+
+**QuickLab > Quick Epoch edits > UN-Epoch (Back to Continuous)** now works
+with the menu's two-output call. It creates a continuous-format copy and keeps
+the epoched original available in **Datasets**. The conversion preserves all
+retained samples in epoch order, event markers (including X), urevent links
+and ICA weights. The time axis uses seconds/milliseconds correctly. Boundary
+events mark every epoch join; their durations are unknown. Epoch rejection
+masks are archived in conversion metadata and removed from active continuous
+rejection state; cached epoch spectra are cleared.
+
+Un-epoching cannot recover deleted samples or reconstruct the original gaps.
+REST 1.2 already supports epoched data: the "3D epoched data" message explains
+the data dimensions and does not require conversion. The original REST GUI
+and the lab's shared-leadfield workflow were checked with both shapes.
+
+## Update and try it
+
+Save your work, close MATLAB, and double-click the existing **EEGLAB 2026**
+shortcut. Click **Yes** when offered **1.4.3**. Leave the updater running until
+EEGLAB opens, then confirm **Updates (1.4.3)**. You can also use **Updates >
+Check for updates** inside EEGLAB; reopen the shortcut after installation.
+
+Click **Practice data** and open the **Unepoch** results folder. It includes
+synthetic epoched input, continuous output, REST output, numeric metrics and
+a boundary plot. For a manual trial, load `synthetic_epoched.set` and use the
+UN-Epoch menu. Expect eight channels, one trial, 1,000 samples and three boundary
+events. The original remains a separate dataset. Save your result as a copy.
+
+## Source and tests
+
+QuickLabMPG **1.2.1** is pinned to
+`f9697b6f8e111e5aa5b69801e4468ed2b6597f7d` with archive SHA-256
+`77b0294705f92528ac24b7f9cbd985dc6840ec208c0bdbef8c3cad5011c3ecb8`.
+EEGLAB and other plugin pins are unchanged. This is not a new upstream-version
+audit of every third-party package.
+
+Passed with MATLAB R2023b Update 3 / EEGLAB 2026.1.0 on Windows:
+
+- All 36 QuickLab regression tests, including 29 channels x 2047 samples x 35
+  epochs; one epoch; no events; continuous no-op; event/boundary/ICA state;
+  invalid inputs; and save/reload.
+- The actual UN-Epoch menu callback, retention of the original, and repeated
+  continuous invocation without creating another dataset.
+- The original REST 1.2 GUI Run callback for epoched and continuous inputs,
+  each compared against the known solver using the same supplied leadfield.
+- Synthetic example: four input epochs become one trial and 1,000 samples,
+  boundaries at 250.5, 500.5 and 750.5, final sample at 3.996 seconds. REST
+  before/after conversion differs by zero microvolts (tolerance 1e-6).
+- 16 updater contract, 27 discovery/controller/worker, 19 Windows reporting
+  and 18 reporting-service/database/identity checks.
+- The unchanged installed 1.4.2 client installed the exact built package in an
+  isolated managed installation. All 53 inventoried plugins plus EEG-BIDS
+  registered, and comparison, REST/Infinity, unepoch, ICA and NeuroLode practice
+  passed before activation. Actual rollback restored 1.4.2 and held 1.4.3;
+  the earlier installation's manifest was unchanged.
+- Managed startup with the remote catalog disabled displayed **Updates (1.4.3)**,
+  registered all 54 plugins and found all 35 menu dependencies. The actual
+  update callback launched the active controller and retained unsaved EEG.
+- All 22 installed synthetic reference files matched their supplied checksums.
+  MATLAB diagnostics privacy, consent, queue, bounded history and export passed.
+
+| Public asset | Bytes | SHA-256 |
+| --- | ---: | --- |
+| EEGLAB2026-Setup.exe | 3588608 | `1c728e53e7a049c2e0568efb0c4af6e3b6426350f2b970168503165945c86df2` |
+| EEGLAB2026-Update.zip | 3569141 | `c08dda90f990323deaa6588e09e3a27945654f67e4576711be7129a920f10ce6` |
+| desktop-update.json | 291 | `be7cc35aa175249f75279d054af0446fa66f46050f790702f1aaeb659c8f3c5d` |
+
+GUI callbacks were tested programmatically; the example boundary plot was
+visually inspected. MATLAB R2026a shown in Dr. Gilbert's screenshot was not
+available locally. No participant recordings were used.
+
+## Reporting status
+
+The versioned code catalog and private collector catalog include 1.4.3 and
+retain earlier releases. The live Supabase service still reports 1.4.0; its
+newer catalog deployment and live-delivery verification remain pending.
+Unacknowledged reports stay queued for retries within the existing 30-day
+retention period. Software updates work independently of that service.

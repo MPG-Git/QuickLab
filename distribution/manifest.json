@@ -533,16 +533,16 @@
       "version": "0.57.0"
     },
     {
-      "archive_root": "QuickLab-22f659666c2d10ded1c9cd3cd192881f18d06a7c/QuickLab_11.12.21_NL/",
-      "bytes": 72979784,
-      "commit": "22f659666c2d10ded1c9cd3cd192881f18d06a7c",
-      "folder": "QuickLabMPG1.2.0",
+      "archive_root": "QuickLab-f9697b6f8e111e5aa5b69801e4468ed2b6597f7d/QuickLab_11.12.21_NL/",
+      "bytes": 75961478,
+      "commit": "f9697b6f8e111e5aa5b69801e4468ed2b6597f7d",
+      "folder": "QuickLabMPG1.2.1",
       "name": "QuickLab",
-      "notes": "Golden editor controls, scoped plot callbacks, ERP event selection, serial FFT graphics, and shared-model REST/Infinity practice; retains BINICA and prior fixes.",
+      "notes": "Fix UN-Epoch output arguments, time axis and boundary markers; retain epoched original; include synthetic unepoch/REST practice. Retains prior layout, comparison and BINICA fixes.",
       "observed": "0.91 plus custom unversioned copy",
-      "sha256": "682280ccd2659498e9c1969e259cd3d90e2efcb02b2adb6fb0cf42f5548891b0",
-      "url": "https://codeload.github.com/MPG-Git/QuickLab/zip/22f659666c2d10ded1c9cd3cd192881f18d06a7c",
-      "version": "1.2.0"
+      "sha256": "77b0294705f92528ac24b7f9cbd985dc6840ec208c0bdbef8c3cad5011c3ecb8",
+      "url": "https://codeload.github.com/MPG-Git/QuickLab/zip/f9697b6f8e111e5aa5b69801e4468ed2b6597f7d",
+      "version": "1.2.1"
     },
     {
       "archive_root": "RELAX-2.0.1/",
