@@ -5,7 +5,7 @@ previousPath = path;
 cleanup = onCleanup(@() path(previousPath)); %#ok<NASGU>
 addpath(eeglabRoot,genpath(fullfile(eeglabRoot,'functions')));
 folder = fileparts(mfilename('fullpath'));
-results = runtests({fullfile(folder,'test_plotDifference.m'),fullfile(folder,'test_setup_report.m'),fullfile(folder,'test_quicklab_workflows.m')});
+results = runtests({fullfile(folder,'test_plotDifference.m'),fullfile(folder,'test_setup_report.m'),fullfile(folder,'test_quicklab_workflows.m'),fullfile(folder,'test_quick_unepoch.m')});
 disp(table(results));
 assert(all([results.Passed] | [results.Incomplete]) && ~any([results.Failed]),'QuickLab tests failed.');
 fprintf('PASS: %d QuickLab tests with EEGLAB %s\n',numel(results),eeg_getversion);

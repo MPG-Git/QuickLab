@@ -1,4 +1,4 @@
-# QuickLab lab edition 1.1.0
+# QuickLab lab edition 1.2.1
 
 The desktop package includes the lab's QuickLab controls and Windows BINICA.
 Install the managed desktop update to get the executable and its OpenBLAS
@@ -37,6 +37,18 @@ is empty. Marked components are never silently removed before a new run:
 reject them explicitly using the component-rejection workflow first.
 
 ## Practice and requirements
+
+**QuickLab > Quick Epoch edits > UN-Epoch (Back to Continuous)** creates a new
+continuous-format dataset and retains the epoched original in **Datasets**.
+It preserves the samples, event markers and ICA weights, corrects the time axis,
+and inserts a boundary between each pair of epochs. It cannot restore deleted
+samples or reconstruct the original gaps. Save the resulting dataset as a copy.
+
+REST 1.2 accepts epoched data; its "3D epoched data" message explains the input
+shape. It is not a requirement to unepoch. The QuickLab **Quick Channel Edit >
+REST / Infinity / Average (same leadfield)** workflow also accepts epochs.
+The desktop practice run includes an **Unepoch** folder with synthetic input,
+continuous output, REST output, boundary plot and numeric reference results.
 
 Click **Practice data** in the desktop build to run comparison, ICA and
 NeuroLode examples. The ICA folder contains synthetic input/output `.set`

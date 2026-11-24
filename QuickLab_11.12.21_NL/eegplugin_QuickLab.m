@@ -1,4 +1,4 @@
-% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.2.0.
+% eegplugin_QuickLab() - MPG lab edition of QuickLab, version 1.2.1.
 %                        QuickLab is a compilation of modified EEGLAB functions
 %                        for experienced users that wish to speed up manual
 %                        process, made by Ugo Bruzadin Nunes in
@@ -24,9 +24,9 @@
 function vers = eegplugin_QuickLab(fig, try_strings, catch_strings)
 
 % EEGLAB parses a textual version. A numeric value is displayed as v?.
-% Install in QuickLabMPG1.2.0 to distinguish this maintained fork from the
+% Install in QuickLabMPG1.2.1 to distinguish this maintained fork from the
 % historical QuickLab 0.91 catalog package. The menu remains "QuickLab".
-vers = '1.2.0';
+vers = '1.2.1';
 if nargin < 1 || isempty(fig), return; end
 % Repeated discovery must not create a second copy of this build's menu.
 % Duplicate installations still need to be removed from the MATLAB path.
@@ -268,7 +268,7 @@ uimenu( epochsmenu, 'label', strcat('Epoch every_', num2str(s), '_seconds'), 'ca
 end
 
 uimenu( epochsmenu, 'label', 'UN-Epoch (Back to Continuous)', 'callback', ...
-    ['[EEG,com] = quick_unepoch(EEG);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);
+    ['[EEGTMP,LASTCOM] = quick_unepoch(EEG); if ~isempty(LASTCOM), EEGTMP = eegh(LASTCOM,EEGTMP); quicklab_publish(EEGTMP); eegh(LASTCOM); end; clear EEGTMP;']);
 
 uimenu( epochsmenu, 'label', 'Quick Epoch 0.400 2.448 (DotLoc)', 'callback', ...
     ['[EEG,com] = quick_epoch(EEG,0.400,2.448);[ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);eeglab redraw;']);

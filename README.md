@@ -8,12 +8,12 @@ For a fresh replacement installation, use the [EEGLAB 2026.1.0 installer](distri
 The desktop installer finds MATLAB, creates shortcuts, and checks GitHub for
 tested updates. Updates are validated before activation, with a previous-version
 shortcut for rollback.
-Desktop version **1.4.2** retains **Save (+)**, filename additions, **Load Folder**,
+Desktop version **1.4.3** retains **Save (+)**, filename additions, **Load Folder**,
 the familiar toolbar order, filepath and ICA/rank rows, saved FFT preview,
 Previous/Next and the file selector. See the [layout guide](docs/GOLDEN_LAYOUT.md). It includes Windows **BINICA** and its
 runtime library, handles rank-reduced ICA/PCA, fixes the high-pass menu, and
 keeps component graphics on the MATLAB client. Our lab edition is registered
-as **QuickLabMPG 1.2.0**. See the [workflow guide](QuickLab_11.12.21_NL/WORKFLOWS.md).
+as **QuickLabMPG 1.2.1**. See the [workflow guide](QuickLab_11.12.21_NL/WORKFLOWS.md).
 
 The Golden Old editor folder/info controls and familiar menu aliases are restored.
 Component actions use the plotted dataset; ERP event selection and FFT saving are
@@ -26,10 +26,12 @@ checks using a second download route, and offers updates again on the next
 launch after **No**. Use **Updates (version) > Check for updates** inside EEGLAB
 for an explicit check. A failed check shows **Retry / Cancel** instead of
 silently appearing up to date. See [1.4.1 validation](distribution/releases/1.4.1.md).
-Version **1.4.2** is a small release for the lab's requested automatic-update
-trial. Analysis tools, plugin versions and synthetic examples are unchanged.
-After updating, confirm **Updates (1.4.2)**. See the
-[1.4.2 verification and directions](distribution/releases/1.4.2.md).
+Version **1.4.3** fixes **UN-Epoch (Back to Continuous)**, including the output
+argument error, time axis and event boundaries. The menu retains the epoched
+original and adds a continuous-format copy. **Practice data** now includes an
+Unepoch example with input/output datasets, numeric checks and a boundary plot.
+REST supports either data shape; its 3D-data warning is informational.
+After updating, confirm **Updates (1.4.3)**.
 **Practice data** runs the comparison, REST/Infinity, ICA and NeuroLode examples, with
 synthetic datasets and numeric reference outputs included. All 53 inventoried
 plugins and bundled EEG-BIDS remain included.
@@ -40,7 +42,7 @@ details. Lab members need no GitHub or Supabase account. See the
 [reporting details](distribution/desktop/REPORTING.md),
 [inventory](distribution/PLUGIN_INVENTORY.md) and
 [validation limits](distribution/VALIDATION.md).
-The reporting service's catalog deployment for 1.4.1/1.4.2 is still pending;
+The reporting service's catalog deployment for 1.4.1 and newer is still pending;
 unacknowledged reports remain queued. Software updates work independently.
 
 ## Install or update
@@ -49,7 +51,7 @@ unacknowledged reports remain queued. Software updates work independently.
    `main` in your existing checkout.
 2. Close EEGLAB. Back up your current QuickLab plugin folder.
 3. For a new installation, copy `QuickLab_11.12.21_NL` into EEGLAB's `plugins`
-   folder and rename it `QuickLabMPG1.1.0`. Keep only one active QuickLab installation on the MATLAB path. This identifies the maintained lab edition separately from the historical catalog plugin.
+   folder and rename it `QuickLabMPG1.2.1`. Keep only one active QuickLab installation on the MATLAB path. This identifies the maintained lab edition separately from the historical catalog plugin.
 4. For a customized **QuickLab GUNN** installation, copy just the updated
    `plotDifference.m` into its existing plugin folder. This preserves your
    customized menu and fixes callbacks that call `plotDifference(ALLEEG)`.

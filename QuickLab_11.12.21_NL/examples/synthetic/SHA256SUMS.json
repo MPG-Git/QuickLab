@@ -14,5 +14,11 @@
   "rest_example/synthetic_Average.set": "42f2fe7c9d6a8be70494f65a8f15ff956f4816845a7539bfacefdec886f517e1",
   "rest_example/synthetic_FieldTrip_Infinity.set": "fb5216b1a1c72d2ec7dd354a11cc5e9ff2802f062d84b4d1850fd168b8561b11",
   "rest_example/synthetic_original.set": "b198e3111f08f760e5a34d750f5554be53e0a644c0880ff55befa96c76d22d88",
-  "rest_example/synthetic_REST.set": "8a0aa78b0b88aeb6352a572047720e79e171e91735047d61e2b02a3e6ef6c7a6"
+  "rest_example/synthetic_REST.set": "8a0aa78b0b88aeb6352a572047720e79e171e91735047d61e2b02a3e6ef6c7a6",
+  "unepoch_example/PASS.txt": "e479ddfd1c67566bd286838667093ebf41478d6c8ef9f069b589a1c2d9989638",
+  "unepoch_example/synthetic_continuous.set": "ef0586479c78828acee8818314146fdb38312d78e55da46a47f887ff7d5fca33",
+  "unepoch_example/synthetic_continuous_REST.set": "645dd0187e40033c58636b4da56b992a3ab9f9392a652b465bf00111961805e6",
+  "unepoch_example/synthetic_epoched.set": "b20290f0627d5e0babd664559cb9ff510a9739e7d414d284b5b18a1000973879",
+  "unepoch_example/unepoch_boundaries.png": "3056cc67f9650370feee32b6067df102443463aed765385c4f41950420fda7bb",
+  "unepoch_example/unepoch_metrics.csv": "372b393a3862b542310ca389acb4458b3ddc6f900b95b55495cf0ce01853b1d4"
 }

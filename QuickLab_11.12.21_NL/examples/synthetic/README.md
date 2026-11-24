@@ -124,3 +124,18 @@ is loaded. Changing to a dataset without a matching picture clears the preview.
 Regenerate the picture in a fresh output folder using
 `generate_fft_preview(fullfile(pluginRoot,'examples','synthetic','data','synthetic_rank3.set'), outputFolder)`.
 
+## Un-epoch practice (QuickLabMPG 1.2.1)
+
+Load `unepoch_example/synthetic_epoched.set`, then choose **QuickLab > Quick
+Epoch edits > UN-Epoch (Back to Continuous)**. Expect a new dataset with eight
+channels, one trial, 1,000 samples, and three boundary events. The epoched
+original remains in the Datasets menu. Compare with `synthetic_continuous.set`
+and `unepoch_metrics.csv` in the same folder. The final sample is at 3.996
+seconds; boundary latencies are 250.5, 500.5 and 750.5 samples.
+
+`run_unepoch_demo(outputFolder)` regenerates these files, a continuous REST
+result and a boundary plot. It also verifies that REST applied before or after
+conversion gives the same potentials (maximum difference below 1e-6 microvolts).
+The original REST 1.2 GUI supports both data shapes. Un-epoching joins retained
+samples; it cannot reconstruct deleted intervals or the original timeline.
+
